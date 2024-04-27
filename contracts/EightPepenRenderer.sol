@@ -1,11 +1,10 @@
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
-// import "./interfaces/IEightPepenRenderer.sol";
+import "./interfaces/IEightPepenRenderer.sol";
 
-abstract contract EightPepenRenderer  {
+contract EightPepenRenderer  {
     // using these two variables(pixels) to render our 8pepen svg
-    function _getSVG(uint256 pixelColors,uint256 colorPalette) internal pure returns (string memory) {
+    function getSVG(uint256 pixelColors,uint256 colorPalette) public pure returns (string memory) {
                 //        X
         //       - - - ->
         //     |

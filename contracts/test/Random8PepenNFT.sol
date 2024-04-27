@@ -9,7 +9,7 @@ contract Random8PepenNFT is EightPepenRenderer{
     uint public totalSupply = 0; // number of tokens minted
     uint public mintPrice = 0.003 ether;
     
-    function getImage(uint256 pixelColors, uint256 colorPalette) public pure returns (string memory){
-        return _getSVG(pixelColors,colorPalette);
+    function getImage(uint256 pixelColors, uint256 colorPalette) public view returns (string memory){
+        return this.getSVG(pixelColors,colorPalette);
     }
 }

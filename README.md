@@ -11,3 +11,6 @@ REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat ignition deploy ./ignition/modules/Lock.ts
 ```
+
+ 8Pepen Renderer deployed at address:  0xd24F7ceC6d599171A85090338dc1A89305E1467D
+ 8Pepen NFT deployed at address:  0xb94A88627feC054757A9A4f3cdab86Da391aA331
