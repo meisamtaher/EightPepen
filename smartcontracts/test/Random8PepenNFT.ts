@@ -10,8 +10,9 @@ describe("Lock", function () {
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshot in every test.
   async function deployRandomNFTFixture() {
-    const PixelColors = 0x1234567890123456789012345678901234562890123412319012345678901230n;
-    const ColorPallet = 0x1234567890123456789012FFFFFF901234FFFFFF123456FF00001234560000FFn;
+    const PixelColors = 0x1211117890123456781111345622221234343490121111319012345678901230n;
+    const ColorPallet = 0x1234567890123456789012FFFFFF901234FFFFFF000000FE000000FF030300FFn;
+    //0 blue, 1 green , 2 red, 3 black, 4 white
     // Contracts are deployed using the first signer/account by default
     // const [owner, otherAccount] = await hre.viem.getWalletClients();
 
