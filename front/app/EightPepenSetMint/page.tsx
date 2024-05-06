@@ -15,18 +15,18 @@ const EightPepenSetMint = () => {
     //   const { isLoading:isLoadingReserve, isSuccess:isSuccessReserve } = useWaitForTransaction({
     //     hash: ReserveData?.hash,
     //   })
-    const PixelColors = 0x1211117890123456781111345622221234343490121111319012345678901230n;
-    const ColorPallet = 0x1234567890123456789012FFFFFF901234FFFFFF474AE2FE000000FF037E5757n;
+    // const PixelColors = 0x1211117890123456781111345622221234343490121111319012345678901230n;
+    // const ColorPallet = 0x1234567890123456789012FFFFFF901234FFFFFF474AE2FE000000FF037E5757n;
     const mintEightPepen = async()=>{
-        const result = writeContract({
-            address: EightPepenSetContractAddress,
-            abi: EightPepenSetNFTABI,
-            functionName: 'mint',
-            args: [PixelColors,ColorPallet
-            ],
-            value: parseEther('0.00003') 
-         })
-         console.log("result: ", result);
+        // const result = writeContract({
+        //     address: EightPepenSetContractAddress,
+        //     abi: EightPepenSetNFTABI,
+        //     functionName: 'mint',
+        //     args: [PixelColors,ColorPallet
+        //     ],
+        //     value: parseEther('0.00003') 
+        //  })
+        //  console.log("result: ", result);
     }
   return (
     <div className='flex flex-col gap-5 justify-center pt-60'>
