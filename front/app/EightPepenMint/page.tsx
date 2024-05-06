@@ -25,9 +25,8 @@ const EightPepenMint = () => {
          console.log("result: ", result);
     }
   return (
-    <div className='flex flex-col gap-5 justify-center'>
-        <a> Eight Pepen Mint</a>
-        <button className='' onClick={mintEightPepen}> Mint</button>
+    <div className='flex flex-col gap-5 justify-center pt-60'>
+        <button className='p-2' onClick={mintEightPepen}> Mint</button>
     </div>
   )
 }

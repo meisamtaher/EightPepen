@@ -14,3 +14,4 @@ npx hardhat ignition deploy ./ignition/modules/Lock.ts
 
  8Pepen Renderer deployed at address:  0xd24F7ceC6d599171A85090338dc1A89305E1467D
  8Pepen NFT deployed at address:  0xb94A88627feC054757A9A4f3cdab86Da391aA331
+ 8Pepen NFT Set at address: 0x4511F973AF854f304fFFeb3341b1C674F1A2D057

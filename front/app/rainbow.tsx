@@ -18,7 +18,7 @@ import {
 const config = getDefaultConfig({
   appName: 'EightPepen',
   projectId: 'e528f025dadac44dcaa3b7b77f3ac08f',
-  chains: [base, baseSepolia, baseGoerli],
+  chains: [ baseSepolia],
   ssr: true, 
 });
 const queryClient = new QueryClient();
