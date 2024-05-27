@@ -7,8 +7,8 @@ import RainbowComponent from "./rainbow";
 const inter = Press_Start_2P({weight:"400", subsets: ["greek"] });
 
 export const metadata: Metadata = {
-  title: "EightPepen",
-  description: "A fully onchain pixel bsed on Opepen",
+  title: "8Pepen",
+  description: "A fully onchain pixel NFT based on Opepen",
 };
 
 export default function RootLayout({
