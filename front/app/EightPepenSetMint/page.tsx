@@ -1,10 +1,10 @@
 'use client'
 import React, { ChangeEvent, useEffect, useState } from 'react'
-import { EightPepenSetContractAddress } from '../Constants/Contracts'
-import { EightPepenSetNFTABI } from "../ABIs/EightPepenSetNFTABI"
+// import { EightPepenSetContractAddress } from '../Constants/Contracts'
+// import { EightPepenSetNFTABI } from "../ABIs/EightPepenSetNFTABI"
 import { useWriteContract } from 'wagmi'
 import { parseEther } from 'viem'
-import Canvas from '../Components/Canvas'
+// import Canvas from '../Components/Canvas'
 import { ImagePixelated } from '../Components/ImagePixelated'
 
 
