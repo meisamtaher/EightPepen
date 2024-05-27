@@ -14,9 +14,7 @@ contract EightPepenRenderer  {
         //  in the colors variable we have 8 colors each need 24 bit that show color in hex
         //  in the pixels varialbe we have 64 pixels each needs 3 bit ...
         //  that shows the color index in the colors variable 
-        // 
-        uint256 bgColorPosition = uint256(pixelColors & uint256(0x7)) * 24;
-        uint24 bgColor = uint24((colorPalette & (0xffffff<<bgColorPosition))>>bgColorPosition);
+        uint24 bgColor = uint24(colorPalette & 0xffffff);
         string memory image = string(abi.encodePacked(
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" shape-rendering="crispEdges" width="512" height="512">',
             '<rect width="100%" height="100%" fill="#',toHexString(bgColor,6) , '"/>'

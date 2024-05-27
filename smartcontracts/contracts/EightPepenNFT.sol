@@ -22,9 +22,11 @@ contract EightPepenNFT is ERC721 {
         require(totalSupply < maxSupply, "Sold out");
         // Make sure the amount of ETH is equal or larger than the minimum mint price
         require(msg.value >= mintPrice, "Not enough ETH sent");
+
         uint256 tokenId = totalSupply+1;
-        imageData[tokenId].pixelColors= uint256(keccak256(abi.encodePacked(block.basefee, block.timestamp)));
-        imageData[tokenId].colorPalette= uint256(keccak256(abi.encodePacked(tokenId, block.timestamp)));
+
+        imageData[tokenId].pixelColors= 0x1111111111111111111111111112111111112111111111111111111111111111;
+        imageData[tokenId].colorPalette= uint256(keccak256(abi.encodePacked(tokenId, block.timestamp))) | 0xFFFFFF000000;
         // Mint token
         _mint(msg.sender, tokenId);
 
