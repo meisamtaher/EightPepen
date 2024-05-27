@@ -5,14 +5,14 @@ import Logo from  "@/public/logo.svg"
 
 const NavBar = () => {
   const links = [
-    {href:"EightPepenMint",label:"Random Mint"},
-    {href:"EightPepenSetMint",label:"Manual Mint"},
+    {href:"eightPepenMint",label:"Random Mint"},
+    {href:"eightPepenSetMint",label:"Manual Mint"},
   ]
   return (
     <nav className='flex space-x-6 mb-5 px-5 h-14 items-center bg-slate-950' >
         <div className='flex flex-row items-center space-x-2'>
           <img src="/logo.svg" className='w-9 h-9'/>
-          <a href={"/"} className="text-white text-lg"> EightPepen</a>
+          <a href={"/"} className="text-white text-lg"> 8Pepen</a>
         </div>
         <ul className='flex space-x-6'>
             {links.map(link=>
