@@ -25,10 +25,10 @@ const EightPepenSetMint = () => {
     // pixelateImage(originalImage1, 8);
     console.log("Hey we are at the end of Pixelation")
   }
-  const pixelatedImage = document.querySelector("#pixelatedImage") as HTMLImageElement;
-  function pixelateImage(originalImage: HTMLImageElement, pixelationFactor: number) {
+  // // const pixelatedImage = document.querySelector("#pixelatedImage") as HTMLImageElement;
+  // function pixelateImage(originalImage: HTMLImageElement, pixelationFactor: number) {
     
-  }
+  // }
     //   const { data:ReserveData ,write:ReserveWrite } = useContractWrite(ReserveConfig);
     //   const { isLoading:isLoadingReserve, isSuccess:isSuccessReserve } = useWaitForTransaction({
     //     hash: ReserveData?.hash,
