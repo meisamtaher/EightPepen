@@ -5,7 +5,9 @@ export type ImagePixelatedProps = {
   width: number
   height: number
   pixelSize: number
-  centered: boolean
+  centered: boolean,
+  setPixelColor:React.Dispatch<React.SetStateAction<string | null>>,
+  setColorPalette:React.Dispatch<React.SetStateAction<string | null>>,
   fillTransparencyColor: string,
   fillBackgroundColor:string
 }
@@ -14,9 +16,11 @@ export const ImagePixelated = ({
   src,
   width,
   height,
-  pixelSize = 5,
+  pixelSize ,
   centered,
   fillTransparencyColor,
+  setColorPalette,
+  setPixelColor,
   fillBackgroundColor
 }: ImagePixelatedProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -28,6 +32,8 @@ export const ImagePixelated = ({
       pixelSize,
       centered,
       fillTransparencyColor,
+      setColorPalette,
+      setPixelColor,
       fillBackgroundColor
     })
   }, [src, width, height, pixelSize, centered, fillTransparencyColor])

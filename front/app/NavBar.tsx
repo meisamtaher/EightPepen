@@ -1,17 +1,17 @@
 import Link from 'next/link'
 import React from 'react'
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import Logo from  "@/public/logo.svg"
+import Logo from  "@/public/logo.png"
 
 const NavBar = () => {
   const links = [
-    {href:"eightPepenMint",label:"Random Mint"},
-    {href:"eightPepenSetMint",label:"Manual Mint"},
+    {href:"eightPepenMint",label:"Vote token"},
+    {href:"eightPepenSetMint",label:"Create"},
   ]
   return (
     <nav className='flex space-x-6 mb-5 px-5 h-14 items-center bg-slate-950' >
         <div className='flex flex-row items-center space-x-2'>
-          <img src="/logo.svg" className='w-9 h-9'/>
+          <img src="/logo.png" className='w-9 h-9'/>
           <a href={"/"} className="text-white text-lg"> 8Pepen</a>
         </div>
         <ul className='flex space-x-6'>

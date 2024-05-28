@@ -6,6 +6,8 @@ import { useWriteContract } from 'wagmi'
 import { parseEther } from 'viem'
 // import Canvas from '../Components/Canvas'
 import { ImagePixelated } from '../Components/ImagePixelated'
+import { ColorPicker, useColor } from 'react-color-palette'
+import "react-color-palette/css";
 
 
 const EightPepenSetMint = () => {
@@ -14,6 +16,7 @@ const EightPepenSetMint = () => {
   const [colorPalette,setColorPalette] = useState<string|null>(null);
   const [file, setFile] = useState<File|null>(null);
   const [fileURL, setFileURL] = useState<string|null>(null);
+  const [bgColor,setBgColor] = useColor("#121212");
   const pixelationFactor = 8;
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if(e?.target?.files){
@@ -86,23 +89,36 @@ const EightPepenSetMint = () => {
     //   }        
     // }, []);
   return (
-    <div className='flex flex-col gap-5 justify-center pt-60'>
-        <button className='p-2' onClick={mintEightPepen}> Mint</button>
-        <button>
-
-        </button>
+    <div className='flex flex-col gap-5 justify-center'>
         <input type='file' accept='.png,.jpg,.jpeg,.svg' onChange={onFileChange}/>
-        <div className='flex felx-row gap-5 p-2'>
-          <div className = 'w-48 h-48 bg-black' >
+        <div className='flex flex-row gap-4 items-center'>
+          <a>Background Color:</a>
+          <button className="btn h-4 w-12" style={{background:bgColor.hex}} onClick={()=>((document?.getElementById('my_modal_2') as HTMLDialogElement).showModal())}></button>
+          <dialog id="my_modal_2" className="modal">
+            <div className="modal-box bg">
+              <ColorPicker   color={bgColor}  
+                      onChange={setBgColor}   /> 
+            </div>
+          
+            <form method="dialog" className="modal-backdrop">
+              <button>close</button>
+            </form>
+          </dialog>
+        </div>
+        <div className='flex felx-row gap-5 p-2 '>
+          <div className = 'flex flex-col w-[240] h-[240]' >
+            <a>uploaded Pic</a>
             <img id="originalImage" src={fileURL!} ></img>
           </div>
-          <div>
-
+          <div >
           </div>
-          <div className = 'w-48 h-48'>
-           <ImagePixelated src={fileURL!} width ={240} height={240} centered={false} fillTransparencyColor="true" fillBackgroundColor='rgb(0,0,0)'  pixelSize={30}></ImagePixelated>
+          <div className = 'w-48 h-48 '>
+            <a>8pepen</a>
+           <ImagePixelated src={fileURL!} width ={240} height={240} setColorPalette={setColorPalette} setPixelColor={setPixelColors} centered={false} fillTransparencyColor="true" fillBackgroundColor={bgColor.hex}  pixelSize={30}></ImagePixelated>
           </div>
         </div>
+        <button className='p-2' onClick={mintEightPepen}> Mint</button>
+
         
     </div>
   )
