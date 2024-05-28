@@ -5,8 +5,8 @@ import Logo from  "@/public/logo.png"
 
 const NavBar = () => {
   const links = [
-    {href:"eightPepenMint",label:"Vote token"},
-    {href:"eightPepenSetMint",label:"Create"},
+    {href:"eightPepenMints",label:"Vote token"},
+    {href:"create",label:"Create"},
   ]
   return (
     <nav className='flex space-x-6 mb-5 px-5 h-14 items-center bg-slate-950' >
