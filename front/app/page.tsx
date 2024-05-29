@@ -2,9 +2,9 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Address, parseAbiItem, zeroAddress } from "viem";
-import {EightPepenSetContractAddress} from "./Constants/Contracts"
+import {EightPepenFCSetContractAddress} from "./Constants/Contracts"
 import { publicClient } from './Utils/client'
-import { EightPepenSetNFTABI } from './ABIs/EightPepenSetNFTABI'
+import { EightPepenFCSetNFTABI } from './ABIs/EightPepenFCSetNFTABI'
 import AddressViewer from "./Components/AddressViewer";
  
 
@@ -20,13 +20,13 @@ export default function Home() {
   const [NFTs,setNFTs] = useState<NFT[]>();
   const getNFTlist = async()=>{
     const totalSupply = await publicClient.readContract({
-      address: EightPepenSetContractAddress,
-      abi: EightPepenSetNFTABI,
+      address: EightPepenFCSetContractAddress,
+      abi: EightPepenFCSetNFTABI,
       functionName: 'totalSupply',
     })
     console.log("total Supply:", totalSupply);
     const logs = await publicClient.getLogs({  
-      address: EightPepenSetContractAddress,
+      address: EightPepenFCSetContractAddress,
       event: parseAbiItem('event Transfer(address indexed, address indexed, uint256)'),
     })
     console.log("Mint logs:", logs)
@@ -35,14 +35,14 @@ export default function Home() {
       console.log("get URI:",i);
 
       const tokenJsonURI = await publicClient.readContract({
-        address: EightPepenSetContractAddress,
-        abi: EightPepenSetNFTABI,
+        address: EightPepenFCSetContractAddress,
+        abi: EightPepenFCSetNFTABI,
         functionName: 'tokenURI',
         args:[BigInt(i)]
       })
       const Address = await publicClient.readContract({
-        address: EightPepenSetContractAddress,
-        abi: EightPepenSetNFTABI,
+        address: EightPepenFCSetContractAddress,
+        abi: EightPepenFCSetNFTABI,
         functionName: 'ownerOf',
         args:[BigInt(i)]
       })

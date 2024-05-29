@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from "react"
+import { rgbaToHexString } from "../Utils/converter"
 
 export type ImagePixelatedProps = {
   src: string
@@ -113,15 +114,12 @@ export const ImagePixelated = ({
       console.log("width: ", width);
       console.log("height: ", height);
       console.log("pixelSize:",pixelSize);
-      for (let x = 0; x < img.width + pixelSize; x += pixelSize) {
-        for (let y = 0; y < img.height + pixelSize; y += pixelSize) {
-          console.log("x:",x," y:",y);
-          console.log("pixelSize :", pixelSize*2);
-          console.log("background:", fillBackgroundColor);
+      let pixel=""
+      for (let y = 0; y < img.height + pixelSize; y += pixelSize) {
+        for (let x = 0; x < img.width + pixelSize; x += pixelSize) {
           if((x>=(pixelSize*2) && x<(pixelSize*6)) && ( (y>=(pixelSize*2) && y< (pixelSize*6)) ||  y == (7*pixelSize) ) ){
             let xColorPick = x
             let yColorPick = y
-  
             if (x >= img.width) {
               xColorPick = x - (pixelSize - (img.width % pixelSize) / 2) + 1
             }
@@ -131,7 +129,7 @@ export const ImagePixelated = ({
             // const rgba = getDominantColor(ctx,xColorPick,yColorPick, pixelSize);
             const rgbas = ctx.getImageData(xColorPick , yColorPick, pixelSize, pixelSize).data
             const rgba = getDominantColor(rgbas);
-            console.log("RGBA x:",xColorPick," y:",yColorPick);
+            pixel =rgbaToHexString(rgba) + pixel;
             ctx.fillStyle =
               rgba[3] === 0
                 ? fillTransparencyColor
@@ -140,8 +138,6 @@ export const ImagePixelated = ({
           }
           else{
             ctx.fillStyle = fillBackgroundColor
-
-            console.log("Background x:",x," y:",y);
           }
           if (centered) {
             ctx.fillRect(
@@ -153,9 +149,9 @@ export const ImagePixelated = ({
           } else {
             ctx.fillRect(x, y, pixelSize, pixelSize)
           }
-          
         }
       }
+      setPixelColor(pixel);
     }
   }
   return <canvas ref={canvasRef} />

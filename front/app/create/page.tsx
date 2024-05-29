@@ -1,14 +1,13 @@
 'use client'
 import React, { ChangeEvent, useEffect, useState } from 'react'
-// import { EightPepenSetContractAddress } from '../Constants/Contracts'
-// import { EightPepenSetNFTABI } from "../ABIs/EightPepenSetNFTABI"
+import { EightPepenFCSetContractAddress } from '../Constants/Contracts'
+import { EightPepenFCSetNFTABI } from "../ABIs/EightPepenFCSetNFTABI"
 import { useWriteContract } from 'wagmi'
 import { parseEther } from 'viem'
 // import Canvas from '../Components/Canvas'
 import { ImagePixelated } from '../Components/ImagePixelated'
 import { ColorPicker, useColor } from 'react-color-palette'
 import "react-color-palette/css";
-
 
 const EightPepenSetMint = () => {
   const { writeContract } = useWriteContract()
@@ -24,14 +23,6 @@ const EightPepenSetMint = () => {
       setFileURL(URL.createObjectURL(e?.target?.files[0]));
     }
   };
-  const create8PepenImage = async(input:File) =>{
-    // pixelateImage(originalImage1, 8);
-    console.log("Hey we are at the end of Pixelation")
-  }
-  // // const pixelatedImage = document.querySelector("#pixelatedImage") as HTMLImageElement;
-  // function pixelateImage(originalImage: HTMLImageElement, pixelationFactor: number) {
-    
-  // }
     //   const { data:ReserveData ,write:ReserveWrite } = useContractWrite(ReserveConfig);
     //   const { isLoading:isLoadingReserve, isSuccess:isSuccessReserve } = useWaitForTransaction({
     //     hash: ReserveData?.hash,
@@ -39,15 +30,24 @@ const EightPepenSetMint = () => {
     // const PixelColors = 0x1211117890123456781111345622221234343490121111319012345678901230n;
     // const ColorPallet = 0x1234567890123456789012FFFFFF901234FFFFFF474AE2FE000000FF037E5757n;
     const mintEightPepen = async()=>{
-        // const result = writeContract({
-        //     address: EightPepenSetContractAddress,
-        //     abi: EightPepenSetNFTABI,
-        //     functionName: 'mint',
-        //     args: [PixelColors,ColorPallet
-        //     ],
-        //     value: parseEther('0.00003') 
-        //  })
-        //  console.log("result: ", result);
+        if(pixelColors){
+          const secondhalf =BigInt("0x"+ pixelColors.slice(0,60));
+          const firsthalf =BigInt("0x" +pixelColors.slice(60,120));
+          const bigIntBgColor = Number("0x" + bgColor.hex.slice(1,7));
+          console.log("Background: ",bigIntBgColor.toString(16));
+          console.log("first half:", firsthalf.toString(16))
+          console.log("second half:", secondhalf.toString(16));
+          const result = await writeContract({
+              address: EightPepenFCSetContractAddress,
+              abi: EightPepenFCSetNFTABI,
+              functionName: 'mint',
+              args: [[firsthalf,secondhalf],bigIntBgColor
+              ],
+              value: parseEther('0.00003') 
+          })
+          console.log("result: ", result);
+        }
+        
     }
     // useEffect(() => {
     //   if(true){
@@ -88,6 +88,9 @@ const EightPepenSetMint = () => {
     //     pixelatedImage.src = canvas.toDataURL();
     //   }        
     // }, []);
+    useEffect(() => {
+      console.log("pixelColors: ",pixelColors)
+    }, [pixelColors]);
   return (
     <div className='flex flex-col gap-5 justify-center'>
         <input type='file' accept='.png,.jpg,.jpeg,.svg' onChange={onFileChange}/>
@@ -99,7 +102,6 @@ const EightPepenSetMint = () => {
               <ColorPicker   color={bgColor}  
                       onChange={setBgColor}   /> 
             </div>
-          
             <form method="dialog" className="modal-backdrop">
               <button>close</button>
             </form>
@@ -118,8 +120,6 @@ const EightPepenSetMint = () => {
           </div>
         </div>
         <button className='p-2' onClick={mintEightPepen}> Mint</button>
-
-        
     </div>
   )
 }
