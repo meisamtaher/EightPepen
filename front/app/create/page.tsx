@@ -6,6 +6,7 @@ import { useWriteContract } from 'wagmi'
 import { parseEther } from 'viem'
 // import Canvas from '../Components/Canvas'
 import { ImagePixelated } from '../Components/ImagePixelated'
+import Crop from '../Components/Crop'
 import { ColorPicker, useColor } from 'react-color-palette'
 import "react-color-palette/css";
 
@@ -13,13 +14,12 @@ const EightPepenSetMint = () => {
   const { writeContract } = useWriteContract()
   const [pixelColors,setPixelColors] = useState<string|null>(null);
   const [colorPalette,setColorPalette] = useState<string|null>(null);
-  const [file, setFile] = useState<File|null>(null);
   const [fileURL, setFileURL] = useState<string|null>(null);
+  const [croppedURL, setCroppedURL] = useState<string|null>(null);
   const [bgColor,setBgColor] = useColor("#121212");
   const pixelationFactor = 8;
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if(e?.target?.files){
-      setFile(e?.target?.files[0]);
       setFileURL(URL.createObjectURL(e?.target?.files[0]));
     }
   };
@@ -107,6 +107,12 @@ const EightPepenSetMint = () => {
             </form>
           </dialog>
         </div>
+        <Crop
+          imgSrc={fileURL}
+          onChange={setCroppedURL}
+          cropWidth={300}
+          cropHeight={400}
+        />
         <div className='flex felx-row gap-5 p-2 '>
           <div className = 'flex flex-col w-[240] h-[240]' >
             <a>uploaded Pic</a>
@@ -116,7 +122,7 @@ const EightPepenSetMint = () => {
           </div>
           <div className = 'w-48 h-48 '>
             <a>8pepen</a>
-           <ImagePixelated src={fileURL!} width ={240} height={240} setColorPalette={setColorPalette} setPixelColor={setPixelColors} centered={false} fillTransparencyColor="true" fillBackgroundColor={bgColor.hex}  pixelSize={30}></ImagePixelated>
+           <ImagePixelated src={croppedURL!} width ={240} height={240} setColorPalette={setColorPalette} setPixelColor={setPixelColors} centered={false} fillTransparencyColor="true" fillBackgroundColor={bgColor.hex}  pixelSize={30}></ImagePixelated>
           </div>
         </div>
         <button className='p-2' onClick={mintEightPepen}> Mint</button>
