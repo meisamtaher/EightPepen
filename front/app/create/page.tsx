@@ -1,10 +1,10 @@
 'use client'
 import React, { ChangeEvent, useEffect, useState } from 'react'
+import { useDropzone } from 'react-dropzone';
 import { EightPepenFCSetContractAddress } from '../Constants/Contracts'
 import { EightPepenFCSetNFTABI } from "../ABIs/EightPepenFCSetNFTABI"
 import { useWriteContract } from 'wagmi'
 import { parseEther } from 'viem'
-// import Canvas from '../Components/Canvas'
 import { ImagePixelated } from '../Components/ImagePixelated'
 import Crop from '../Components/Crop'
 import { ColorPicker, useColor } from 'react-color-palette'
@@ -18,11 +18,6 @@ const EightPepenSetMint = () => {
   const [croppedURL, setCroppedURL] = useState<string|null>(null);
   const [bgColor,setBgColor] = useColor("#121212");
   const pixelationFactor = 8;
-  const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if(e?.target?.files){
-      setFileURL(URL.createObjectURL(e?.target?.files[0]));
-    }
-  };
     //   const { data:ReserveData ,write:ReserveWrite } = useContractWrite(ReserveConfig);
     //   const { isLoading:isLoadingReserve, isSuccess:isSuccessReserve } = useWaitForTransaction({
     //     hash: ReserveData?.hash,
@@ -49,83 +44,49 @@ const EightPepenSetMint = () => {
         }
         
     }
-    // useEffect(() => {
-    //   if(true){
-    //     const originalImage = document.querySelector("#originalImage") as HTMLImageElement;
-    //     const canvas = document.createElement("canvas");
-    //     const context = canvas.getContext("2d");
-    //     const originalWidth = originalImage.width;
-    //     const originalHeight = originalImage.height;
-    //     const canvasWidth = originalWidth;
-    //     const canvasHeight = originalHeight;
-    //     canvas.width = canvasWidth;
-    //     canvas.height = canvasHeight;
-    //     console.log("image width:", originalWidth)
-    //     console.log("image height:", originalHeight)
-    //     context?.drawImage(originalImage, 0, 0, originalWidth, originalHeight);
-    //     const originalImageData = context?.getImageData(
-    //       0,
-    //       0,
-    //       originalWidth,
-    //       originalHeight
-    //     ).data;
-    //     if ( originalImageData && context) {
-    //       for (let y = 0; y < originalHeight; y += pixelationFactor) {
-    //         for (let x = 0; x < originalWidth; x += pixelationFactor) {
-    //           // extracting the position of the sample pixel
-    //           const pixelIndexPosition = (x + y * originalWidth) * 4;
-    //           // drawing a square replacing the current pixels
-    //           context.fillStyle = `rgba(
-    //             ${originalImageData[pixelIndexPosition]},
-    //             ${originalImageData[pixelIndexPosition + 1]},
-    //             ${originalImageData[pixelIndexPosition + 2]},
-    //             ${originalImageData[pixelIndexPosition + 3]}
-    //           )`;
-    //           context.fillRect(x, y, pixelationFactor, pixelationFactor);
-    //         }
-    //       }
-    //     }
-    //     pixelatedImage.src = canvas.toDataURL();
-    //   }        
-    // }, []);
     useEffect(() => {
       console.log("pixelColors: ",pixelColors)
     }, [pixelColors]);
+
+
+  const { getRootProps, getInputProps } = useDropzone({
+    multiple: false,
+    onDrop: ([file]) => setFileURL(URL.createObjectURL(file)),
+  });
+
   return (
-    <div className='flex flex-col gap-5 justify-center'>
-        <input type='file' accept='.png,.jpg,.jpeg,.svg' onChange={onFileChange}/>
-        <div className='flex flex-row gap-4 items-center'>
-          <a>Background Color:</a>
-          <button className="btn h-4 w-12" style={{background:bgColor.hex}} onClick={()=>((document?.getElementById('my_modal_2') as HTMLDialogElement).showModal())}></button>
-          <dialog id="my_modal_2" className="modal">
-            <div className="modal-box bg">
-              <ColorPicker   color={bgColor}  
-                      onChange={setBgColor}   /> 
-            </div>
-            <form method="dialog" className="modal-backdrop">
-              <button>close</button>
-            </form>
-          </dialog>
+    <div className='flex flex-col px-14 py-10 bg-[#D9D9D9] mt-[-20px] min-h-[calc(100vh-56px)]'>
+      <input {...getInputProps()} accept='.png,.jpg,.jpeg,.svg' />
+      <div className='flex items-center gap-4'>
+        <a>Background Color:</a>
+        <button className="btn h-4 w-12" style={{background:bgColor.hex}} onClick={()=>((document?.getElementById('my_modal_2') as HTMLDialogElement).showModal())}></button>
+      </div>
+      <dialog id="my_modal_2" className="modal">
+        <div className="modal-box bg">
+          <ColorPicker color={bgColor} onChange={setBgColor} /> 
         </div>
-        <Crop
-          imgSrc={fileURL}
-          onChange={setCroppedURL}
-          cropWidth={300}
-          cropHeight={400}
-        />
-        <div className='flex felx-row gap-5 p-2 '>
-          <div className = 'flex flex-col w-[240] h-[240]' >
-            <a>uploaded Pic</a>
-            <img id="originalImage" src={fileURL!} ></img>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+      {fileURL ? <>
+        <div className='my-16 flex gap-16 grow'>
+          <div className='flex flex-col gap-4 w-[240px]'>
+            <img id="originalImage" src={fileURL!} />
+            Original image
+            <div className='cursor-pointer bg-[#828282] text-white p-2' onClick={() => setFileURL(null)}>Choose another image</div>
           </div>
-          <div >
-          </div>
-          <div className = 'w-48 h-48 '>
-            <a>8pepen</a>
-           <ImagePixelated src={croppedURL!} width ={240} height={240} setColorPalette={setColorPalette} setPixelColor={setPixelColors} centered={false} fillTransparencyColor="true" fillBackgroundColor={bgColor.hex}  pixelSize={30}></ImagePixelated>
+          <Crop imgSrc={fileURL!} onChange={setCroppedURL} cropWidth={120} cropHeight={120} />
+          <div className='w-[240px] h-[240px]'>
+            <ImagePixelated src={croppedURL!} width={240} height={240} setColorPalette={setColorPalette} setPixelColor={setPixelColors} centered={false} fillTransparencyColor="true" fillBackgroundColor={bgColor.hex} pixelSize={30}></ImagePixelated>
           </div>
         </div>
-        <button className='p-2' onClick={mintEightPepen}> Mint</button>
+        <button className='p-2' onClick={mintEightPepen}>Mint</button>
+      </> : (
+        <div {...getRootProps()} className='cursor-pointer my-16 flex items-center w-[240px] h-[240px] bg-[#F5F5F5] font-light text-center text-xs text-[#828282]'>
+          Click to upload or drag & drop
+        </div>
+      )}
     </div>
   )
 }

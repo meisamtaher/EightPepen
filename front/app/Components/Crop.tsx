@@ -55,12 +55,11 @@ let Crop = ({ imgSrc, cropWidth, cropHeight, onChange }) => {
   }
 
   let updateScale = (scale, left, top) => {
-    // TODO: top, left
     let ratio = scale / drag.scale
     updateDrag({
       scale,
-      left: drag.left * ratio,
-      top: drag.top * ratio,
+      left: left + (drag.left - left) * ratio,
+      top: top + (drag.top - top) * ratio,
     })
     clearTimeout(drag.scaleTimeout)
     drag.scaleTimeout = setTimeout(() => {
@@ -69,15 +68,30 @@ let Crop = ({ imgSrc, cropWidth, cropHeight, onChange }) => {
   }
 
   let handleWheel = e => {
+    if (!e.ctrlKey && !e.metaKey)
+      return
     e.preventDefault()
     e.stopPropagation()
-    updateScale(drag.scale * (e.deltaY > 0 ? 0.9 : 10 / 9), e.pageX, e.pageY)
+
+    let { left, top } = ref.current.getBoundingClientRect()
+    updateScale(
+      drag.scale * Math.exp(Math.sign(e.deltaY) * -0.2),
+      e.pageX - left,
+      e.pageY - top,
+    )
+  }
+
+  let handleScaleRangeChange = e => {
+    updateScale(
+      e.target.value,
+      cropWidth,
+      cropHeight,
+    )
   }
 
   let initImg = () => {
-    if (drag.initialized || !imgSrc) {
+    if (drag.initialized || !imgSrc)
       return
-    }
     let { width, height } = imgRef.current
     let scale = 2 * Math.max(cropWidth / width, cropHeight / height)
     updateDrag({
@@ -149,7 +163,7 @@ let Crop = ({ imgSrc, cropWidth, cropHeight, onChange }) => {
   }
 
   return (
-    <div className="m-4">
+    <div>
       <div
         className="relative overflow-hidden cursor-move border-solid border border-slate-600"
         ref={ref}
@@ -186,14 +200,14 @@ let Crop = ({ imgSrc, cropWidth, cropHeight, onChange }) => {
           }}
         />
       </div>
-      <div className="my-4">
+      <div className="my-4 flex flex-col gap-4 items-stretch">
         <input
           type="range"
           step={0.01}
           min={minScale}
           max={drag.maxScale || 2 * drag.scale}
           value={drag.scale}
-          onChange={e => updateScale(e.target.value)}
+          onChange={handleScaleRangeChange}
         />
         {' '}scale: {drag.scale.toFixed(3)}
       </div>
