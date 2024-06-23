@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Address, parseAbiItem, zeroAddress } from "viem";
 import {EightPepenFCSetContractAddress} from "./Constants/Contracts"
-import { publicClient } from './Utils/client'
+import { publicClient } from './utils/client'
 import { EightPepenFCSetNFTABI } from './ABIs/EightPepenFCSetNFTABI'
 import AddressViewer from "./Components/AddressViewer";
  
