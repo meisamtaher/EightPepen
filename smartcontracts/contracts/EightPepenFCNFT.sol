@@ -4,16 +4,17 @@ import "./interfaces/IEightPepenFCRenderer.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/interfaces/IERC721.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 
 contract EightPepenFCNFT is ERC721 {
-    uint public maxSupply = 16000;
-    uint public totalSupply; // number of tokens minted
+    uint16 public maxSupply = 16000;
+    uint public totalSupply; 
     uint public mintPrice = 0.00003 ether;
     IEightPepenFCRenderer public renderer;
     uint64 public setSupply;
     uint public imageSupply;
     struct Set{
-        bytes32 name;
+        string name;
         string description;
         IEightPepenFCRenderer renderer;
         bool hasRenderer;
@@ -23,7 +24,7 @@ contract EightPepenFCNFT is ERC721 {
         uint24 bgColor;
         uint64 setId;
         bool revealed;
-        uint8 count;
+        uint16 count;
     } 
     struct TokenData{
         uint256 imageId;
@@ -33,17 +34,18 @@ contract EightPepenFCNFT is ERC721 {
     mapping(uint256 => EightPepenFCData) public images;
     mapping(uint256 => TokenData) public tokens;
 
-    event AddImage(uint256 indexed _id, uint256 indexed _setId, uint8 count,address artist);
-    event AddISet (uint256 indexed _id, address artist);
+    event AddImage(uint256 indexed _id, uint256 indexed _setId, uint16 count,address artist);
+    event AddSet (uint256 indexed _id, address artist);
     event Opt_In(uint256 indexed _tokenId, uint256 indexed _imageId);
-    event Published(uint256 indexed _id, uint256 indexed _setId, uint8 count,address artist);
+    event Published(uint256 indexed _id, uint256 indexed _setId, uint16 count,address artist);
 
     constructor(IEightPepenFCRenderer _renderer)ERC721("Eight Pepen Full Color", "8PEPEN"){
         renderer = _renderer;
         EightPepenFCData memory firstImage;
         firstImage.pixelColors[0]= 0xffffffffffffffffffffffffffff000000ffffffffffffffffffffffffffffff;
         firstImage.pixelColors[1]= 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000;
-        firstImage.bgColor=0x000000;
+        firstImage.bgColor= 0x000000;
+        firstImage.count= maxSupply+1;
         Set memory  firstSet;
         firstSet.name = "not revealed";
         firstSet.description = "This token can opt-in to each NFT ";
@@ -63,12 +65,13 @@ contract EightPepenFCNFT is ERC721 {
         images[imageSupply].count = _image.count;
         images[imageSupply].setId = _setId;
         images[imageSupply].revealed= false;
-        emit AddImage()
+        emit AddImage(imageSupply,_setId,_image.count,msg.sender);
     }
     function addSet(EightPepenFCData memory _nftData,Set memory _setData) internal {
         setSupply++;
         sets[setSupply] = _setData;
         addImage(_nftData, setSupply);
+        emit AddSet(setSupply,msg.sender);
     }
     function addSet(EightPepenFCData[] memory _nftDatas,Set memory _setData) public {
         setSupply++;
@@ -76,6 +79,7 @@ contract EightPepenFCNFT is ERC721 {
         for(uint i=0;i<_nftDatas.length;i++){
             addImage(_nftDatas[i], setSupply);
         }
+        emit AddSet(setSupply,msg.sender);
     }
     function mint() public payable {
         // Require token ID to be between 1 and maxSupply (111)
@@ -84,7 +88,7 @@ contract EightPepenFCNFT is ERC721 {
         require(msg.value >= mintPrice, "Not enough ETH sent");
         ++totalSupply;
         uint256 tokenId = totalSupply;
-        tokens[tokenId].imageId = 0;
+        tokens[tokenId].imageId = 1;
         _mint(msg.sender, tokenId);
         
     }
@@ -96,18 +100,24 @@ contract EightPepenFCNFT is ERC721 {
         require(!images[tokens[_tokenId].imageId].revealed,"you can't opt-in with a revealed token");
         /// if user is changing opt-in we should change votes for latest image
         unsafe_opt_in(_imageId,_tokenId);
+        emit Opt_In(_tokenId,_imageId);
     }
     function unsafe_opt_in(uint256 _imageId,uint256 _tokenId) internal {
         tokens[_tokenId].imageId = _imageId;
         votes[_imageId] ++;
         if(votes[_imageId]==images[_imageId].count){
             images[_imageId].revealed = true;
+            emit Published(_imageId,images[_imageId].setId,images[_imageId].count,msg.sender);
         }
     }
     function tokenURI(uint tokenId)public view override returns (string memory){
         require(tokenId>0 && tokenId<=totalSupply,"Invalid tokenId");
-        uint256 imageId = images[tokens[tokenId].imageId].revealed?tokens[tokenId].imageId:0;
-        IEightPepenFCRenderer customRenderer = (imageId!=0 && sets[images[imageId].setId].hasRenderer)?sets[images[imageId].setId].renderer:renderer;
+        uint256 imageId = images[tokens[tokenId].imageId].revealed?tokens[tokenId].imageId:1;
+        return imageURI(imageId);
+    }
+    function imageURI(uint _imageId)public view returns (string memory){
+        require(_imageId>0 && _imageId<=imageSupply,"Invalid imageId");
+        IEightPepenFCRenderer customRenderer = (_imageId!=0 && sets[images[_imageId].setId].hasRenderer)?sets[images[_imageId].setId].renderer:renderer;
         return
             string(
                 abi.encodePacked(
@@ -116,14 +126,31 @@ contract EightPepenFCNFT is ERC721 {
                         bytes(
                             abi.encodePacked(
                                 '{"name": "Eight Pepen #',
-                                Strings.toString(tokenId),
-                                '", "description": "Eight Pepen is a collection of 888 fully on-chain, randomly generated, ", "attributes": "", "image":"data:image/svg+xml;base64,',
-                                Base64.encode(bytes(customRenderer.getSVG(images[imageId].pixelColors,images[imageId].bgColor))),
-                                '"}'
+                                Strings.toString(_imageId),
+                                '", "description": "Eight Pepen is a collection of 888 fully on-chain, randomly generated'
+                                '", "image":"data:image/svg+xml;base64,',
+                                Base64.encode(bytes(customRenderer.getSVG(images[_imageId].pixelColors,images[_imageId].bgColor))),
+                                // '", "attributes": ""',
+                                // '}'
+                                '", "attributes": [',
+                                getAttributes(_imageId),
+                                ']}'
                             )
                         )
                     )
                 )
             );
+    }
+    function getAttributes(uint _imageId) internal view returns (string memory){
+        return string(
+                abi.encodePacked(
+                    '{"trait_type":"Set", "value": "',
+                    sets[images[_imageId].setId].name,
+                    '"},{"trait_type":"Revealed", "value": "',
+                    images[_imageId].revealed?"True":"False",
+                    '"},{"trait_type":"Edition Size", "value": "',
+                    Strings.toString(images[_imageId].count),'"}'
+                )
+        );
     }
 }
