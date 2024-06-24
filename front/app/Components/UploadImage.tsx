@@ -205,7 +205,7 @@ let Upload = forwardRef(({ bgColor, defaultFillColor, onChange }, ref) => {
   }
 
   return (
-    <div className='mt-16 flex items-start gap-16'>
+    <div className='flex items-start gap-16'>
       {img ? (
         <div>
           <div
