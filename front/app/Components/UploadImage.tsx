@@ -83,7 +83,7 @@ let Upload = forwardRef(({ bgColor, defaultFillColor, onChange }, ref) => {
   }
 
   let updateScale = (scale, left, top) => {
-    if (drag.scale === minScale && scale <= minScale)
+    if (drag.scale <= minScale + 0.001 && scale <= minScale)
       return
     let ratio = scale / drag.scale
     updateDrag({
