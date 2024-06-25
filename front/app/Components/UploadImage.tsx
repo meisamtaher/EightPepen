@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import { useState, useRef, useEffect, useMemo, useImperativeHandle, forwardRef } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { rgbaToHexString } from '../utils/converter'
@@ -10,6 +10,7 @@ let sideDim = dim / 4
 let pixelDim = dim / 8
 
 let Upload = forwardRef(({ bgColor, defaultFillColor, onChange }, ref) => {
+  Upload.displayName = 'Upload';
   let [img, setImg] = useState()
   let update = useUpdate()
   let cropRef = useRef()

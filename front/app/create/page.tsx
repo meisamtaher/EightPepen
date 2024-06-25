@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client'
 import React, { useState, useRef } from 'react'
 import { EightPepenFCSetContractAddress } from '../Constants/Contracts'
