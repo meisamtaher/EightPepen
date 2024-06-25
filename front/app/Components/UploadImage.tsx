@@ -83,7 +83,7 @@ let Upload = forwardRef(({ bgColor, defaultFillColor, onChange }, ref) => {
   }
 
   let updateScale = (scale, left, top) => {
-    if (drag.scale <= minScale + 0.001 && scale <= minScale)
+    if (drag.scale === minScale && scale <= minScale)
       return
     let ratio = scale / drag.scale
     updateDrag({
@@ -129,7 +129,7 @@ let Upload = forwardRef(({ bgColor, defaultFillColor, onChange }, ref) => {
     }
     el.addEventListener('wheel', handleWheel, { passive: false })
     return () => el.removeEventListener('wheel', handleWheel, { passive: false })
-  }, [imgRef.current])
+  }, [imgRef.current, minScale])
 
   useEffect(() => {
     let pixelCtx = pixelCanvasRef.current.getContext('2d')
