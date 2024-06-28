@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { EightPepenContractAddress } from '../Constants/Contracts';
+import { EightPepenContractAddress, EightPepenFCContractAddress } from '../Constants/Contracts';
 import { EightPepenNFTABI } from "../ABIs/EightPepenNFTABI"
 import { useAccount, useWriteContract,  } from 'wagmi';
 import { parseEther } from 'viem';
@@ -15,7 +15,7 @@ const EightPepenMint = () => {
     //   })
     const mintEightPepen = async()=>{
         const result = writeContract({
-            address: EightPepenContractAddress,
+            address: EightPepenFCContractAddress,
             abi: EightPepenNFTABI,
             functionName: 'mint',
             args: [
