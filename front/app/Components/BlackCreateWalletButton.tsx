@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client'
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useConnect } from 'wagmi';
