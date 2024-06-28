@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useState, useRef, useEffect, useMemo, useImperativeHandle, forwardRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { rgbaToHexString } from '../utils/converter'
+import { rgbaToHexString } from '../Util/converter'
 import useUpdate from '../hooks/useUpdate'
 
 let dim = 240
@@ -166,8 +166,8 @@ let Upload = forwardRef(({ bgColor, defaultFillColor, onChange }, ref) => {
       cropDim, pixelDim)
 
     let pixelsString = ''
-    for (let i = 0; i < 8; i++) {
-      for (let j = 0; j < 8; j++) {
+    for (let j = 0; j < 8; j++) {
+      for (let i = 0; i < 8; i++) {
         let setPixelColor = (ctx, jPixel) => {
           let iPixel = i - 2
           let rgbas = ctx.getImageData(iPixel * pixelDim, jPixel * pixelDim, pixelDim, pixelDim).data

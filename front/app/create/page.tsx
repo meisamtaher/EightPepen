@@ -1,8 +1,8 @@
 // @ts-nocheck
 'use client'
 import React, { useState, useRef } from 'react'
-import { EightPepenFCSetContractAddress } from '../Constants/Contracts'
-import { EightPepenFCSetNFTABI } from "../ABIs/EightPepenFCSetNFTABI"
+import { EightPepenFCRenderer, EightPepenFCContractAddress } from '../Constants/Contracts'
+import { EightPepenFCNFTABI } from "../ABIs/EightPepenFCNFTABI"
 import { useWriteContract } from 'wagmi'
 import { parseEther } from 'viem'
 import UploadImage from '../Components/UploadImage'
@@ -10,7 +10,7 @@ import { ColorPicker, useColor } from 'react-color-palette'
 import "react-color-palette/css";
 
 const EightPepenSetMint = () => {
-  const [pixelColors,setPixelColors] = useState<string|null>(null);
+  const [colorPixels,setPixelColors] = useState<string|null>(null);
   const [multiPixelColors, setMultiPixelColors] = useState<string[]>(Array(6).fill(''));
   const [editionType, setEditionType] = useState<string>('numbered');
   const [artistName, setArtistName] = useState<string>('');
@@ -19,22 +19,23 @@ const EightPepenSetMint = () => {
   const uploadRef = useRef()
   const { writeContract } = useWriteContract()
   const [bgColor,setBgColor] = useColor("#121212");
-
     const mintEightPepen = async()=>{
-        if(pixelColors){
-          const secondhalf =BigInt("0x"+ pixelColors.slice(0,60));
-          const firsthalf =BigInt("0x" +pixelColors.slice(60,120));
+        if(editionType === 'numbered'){
+          console.log("pixel colors: ", colorPixels);
+          const secondhalf =BigInt("0x"+ colorPixels!.slice(0,60));
+          const firsthalf =BigInt("0x" +colorPixels!.slice(60,120));
           const bigIntBgColor = Number("0x" + bgColor.hex.slice(1,7));
           const result = await writeContract({
-              address: EightPepenFCSetContractAddress,
-              abi: EightPepenFCSetNFTABI,
-              functionName: 'mint',
-              args: [[firsthalf,secondhalf],bigIntBgColor
-              ],
-              value: parseEther('0.00003') 
+            address: EightPepenFCContractAddress,
+            abi: EightPepenFCNFTABI,
+            functionName: 'submitSet',
+            args: [[{pixelColors:[firsthalf,secondhalf],bgColor:bigIntBgColor,setId:BigInt(0),revealed:false,count:80}],{name:collectionName,description,renderer:EightPepenFCRenderer,hasRenderer:false}]
           })
           console.log("result: ", result);
-        }        
+        }
+        else{
+
+        }  
     }
 
   return (
@@ -85,7 +86,7 @@ const EightPepenSetMint = () => {
         <div className='my-4 w-52'>Description:</div>
         <input className='p-3' value={description} onChange={e => setDescription(e.target.value)} />
       </div>
-      {(editionType === 'numbered' ? pixelColors : multiPixelColors.some(Boolean)) && (
+      {(editionType === 'numbered' ? colorPixels : multiPixelColors.some(Boolean)) && (
         <div className='mt-8 flex gap-4'>
           <button className='p-4 w-64 bg-white text-black' onClick={() => { setEditionType('numbered'); uploadRef.current?.reset() }}>Cancel</button>
           <button className='p-4 w-64 bg-black text-white' onClick={mintEightPepen}>Mint</button>
