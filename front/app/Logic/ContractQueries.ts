@@ -1,7 +1,7 @@
 import { rejects } from "assert";
 import { EightPepenFCNFTABI } from "../ABIs/EightPepenFCNFTABI";
 import { EightPepenFCContractAddress } from "../Constants/Contracts";
-import { publicClient } from "../Utils/client";
+import { publicClient } from "../Util/client";
 import { Address, parseAbiItem } from "viem";
 
 export interface Set{

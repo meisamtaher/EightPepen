@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useState, useRef, useEffect, useMemo, useImperativeHandle, forwardRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { rgbaToHexString } from '../Utils/converter'
+import { rgbaToHexString } from '../Util/converter'
 import useUpdate from '../hooks/useUpdate'
 
 let dim = 240

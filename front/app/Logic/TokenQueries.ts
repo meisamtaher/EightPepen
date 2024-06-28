@@ -1,6 +1,6 @@
 import { EightPepenFCNFTABI } from "../ABIs/EightPepenFCNFTABI"
 import { EightPepenFCContractAddress } from "../Constants/Contracts"
-import { publicClient } from "../Utils/client"
+import { publicClient } from "../Util/client"
 
 export interface NFT{
     id: number,
