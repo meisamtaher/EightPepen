@@ -20,7 +20,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <RainbowComponent>
-          <div className='flex flex-col w-screen h-screen'>
+          <div className='flex flex-col w-full h-screen'>
             <NavBar />
             <div className='grow p-8 bg-[#D9D9D9]'>{children}</div>
           </div>
