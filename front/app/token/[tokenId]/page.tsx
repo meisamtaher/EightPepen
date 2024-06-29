@@ -10,10 +10,10 @@ const TokenPage = ({ params }: { params: { tokenId: string } }) => {
   return (
     <div>
         {nft && 
-            <div className='flex flex-col g-1'>
+            <div className='w-[150px] h-[250px] flex flex-col g-1'>
                 
                 <img src={nft!.image} width={150} height={150}></img>  
-                <a className=' text-xs'>name: {nft!.name}</a>
+                <a className='w-[150px] text-wrap text-xs mt-2'>name: {nft!.name}</a>
             </div>
         }
     </div>

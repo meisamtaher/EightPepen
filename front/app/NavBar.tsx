@@ -9,17 +9,17 @@ import { useAccount } from 'wagmi';
 const NavBar = () => {
   const account = useAccount();
   const links = [
-    {href:"eightPepenMints",label:"Mint"},
-    {href:"create",label:"Create"},
-    {href:"submissions",label:"Submissions"},
-    {href:"sets",label:"sets"},
+    {href:"/eightPepenMints",label:"Mint"},
+    {href:"/create",label:"Create"},
+    {href:"/submissions",label:"Submissions"},
+    {href:"/sets",label:"sets"},
   ]
   useEffect(() => {
     console.log("account: ", account)
   }, [account]);
   return (
-    <nav className='flex space-x-6 mb-5 px-5 h-20 items-center bg-slate-950'  >
-        <div className='flex flex-row items-center space-x-2'>
+    <nav className='flex space-x-6 px-5 shrink-0 h-20 items-center bg-slate-950'  >
+        <div className='flex flex-row items-center space-x-2 mr-16'>
           <img src="/logo.png" className='w-9 h-9'/>
           <Link href={"/"} className="text-white text-lg"> 8Pepen</Link>
         </div>

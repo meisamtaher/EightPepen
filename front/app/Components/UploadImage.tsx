@@ -245,8 +245,8 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
         <button>close</button>
       </form>
     </dialog>
-    <div className='my-8 flex items-center'>
-      <div className='w-72'>Pen Color:</div>
+    <div className='mt-2 mb-12 flex items-center'>
+      <div className='w-56 text-xs'>Pen Color:</div>
       <button className="btn h-4 w-12"
         style={{ background: penColor.hex }}
         onClick={() => document.getElementById('fg-color-modal-' + index).showModal()}
