@@ -19,7 +19,7 @@ const EightPepenSetMint = () => {
   const { writeContract } = useWriteContract()
   const mintEightPepen = async () => {
     let colors = editionType === 'numbered'
-      ? [colorPixels[0], bgColors[0][0]]
+      ? [[colorPixels[0], bgColors[0][0]]]
       : colorPixels.map((colorPixels, i) => [colorPixels, bgColors[i][0]])
     await writeContract({
       address: EightPepenFCContractAddress,

@@ -133,7 +133,8 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
     let pixelsString = ''
     for (let j = 0; j < 8; j++)
       for (let i = 0; i < 8; i++)
-        pixelsString = pixelColors[i][j] + pixelsString
+        if (isIJInside(i, j))
+          pixelsString = pixelColors[i][j] + pixelsString
     onChange(pixelsString)
   }
 
