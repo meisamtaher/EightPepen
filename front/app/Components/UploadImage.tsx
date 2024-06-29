@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useState, useRef, useEffect, useMemo, useImperativeHandle, forwardRef } from 'react'
 import { useDropzone } from 'react-dropzone'
+import { ColorPicker, useColor, ColorService } from 'react-color-palette'
 import { rgbaToHexString } from '../Util/converter'
 import useUpdate from '../hooks/useUpdate'
 
@@ -9,24 +10,27 @@ let cropDim = dim / 2
 let sideDim = dim / 4
 let pixelDim = dim / 8
 
-let Upload = forwardRef(({ bgColor, defaultFillColor, onChange }, ref) => {
-  Upload.displayName = 'Upload';
-  let [img, setImg] = useState()
+let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) => {
   let update = useUpdate()
+  let [img, setImg] = useState()
+  let [penColor, setPenColor] = useColor('#f00')
   let cropRef = useRef()
   let imgRef = useRef()
   let cropCanvasRef = useRef()
   let cropCanvasRef2 = useRef()
   let pixelCanvasRef = useRef()
+  let pixelColorsRef = useRef(Array(8).fill().map(() => Array(8).fill()))
+  let pixelColors = pixelColorsRef.current
   let dragRef = useRef({ scale: 0 })
   let drag = dragRef.current
   useImperativeHandle(ref, () => ({
     reset: () => {
+      setPenColor(ColorService.convert('hex', '#f00'))
+      pixelColorsRef.current = Array(8).fill().map(() => Array(8).fill())
       dragRef.current = { scale: 0 }
       setImg(null)
-      onChange(null)
     }
-  }), []);
+  }), [])
 
   let minScale = Math.max(cropDim / drag.width, (cropDim + sideDim) / drag.height) || 0
 
@@ -111,6 +115,29 @@ let Upload = forwardRef(({ bgColor, defaultFillColor, onChange }, ref) => {
     )
   }
 
+  let isIJInside = (i, j) => (1 < i && i < 6 && ((1 < j && j < 6) || j === 7))
+
+  let handlePen = e => {
+    let i = Math.floor(e.nativeEvent.offsetX / pixelDim)
+    let j = Math.floor(e.nativeEvent.offsetY / pixelDim)
+    if (!isIJInside(i, j))
+      return
+    let pixelCtx = pixelCanvasRef.current.getContext('2d')
+    pixelCtx.fillStyle = penColor.hex
+    pixelCtx.fillRect(i * pixelDim, j * pixelDim, pixelDim, pixelDim)
+    pixelColors[i][j] = penColor.hex.slice(1)
+    updatePixelsString()
+  }
+
+  let updatePixelsString = () => {
+    let pixelsString = ''
+    for (let j = 0; j < 8; j++)
+      for (let i = 0; i < 8; i++)
+        if (isIJInside(i, j))
+          pixelsString = pixelColors[i][j] + pixelsString
+    onChange(pixelsString)
+  }
+
   useEffect(() => {
     window.addEventListener('mousemove', performDrag)
     window.addEventListener('mouseup', endDrag)
@@ -132,19 +159,23 @@ let Upload = forwardRef(({ bgColor, defaultFillColor, onChange }, ref) => {
   }, [imgRef.current, minScale])
 
   useEffect(() => {
+    if (!pixelCanvasRef.current)
+      return
+
     let pixelCtx = pixelCanvasRef.current.getContext('2d')
 
     if (!img) {
       for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
-          pixelCtx.fillStyle = (1 < i && i < 6 && ((1 < j && j < 6) || j === 7)) ? defaultFillColor : bgColor
+          pixelCtx.fillStyle = isIJInside(i, j) ? defaultFillColor : bgColor
+          pixelColors[i][j] = pixelCtx.fillStyle.slice(1) // assuming hex
           pixelCtx.fillRect(i * pixelDim, j * pixelDim, pixelDim, pixelDim)
         }
       }
       return
     }
 
-    if (!cropCanvasRef.current || !cropCanvasRef2.current || !pixelCanvasRef.current)
+    if (!cropCanvasRef.current || !cropCanvasRef2.current)
       return
 
     let cropCtx = cropCanvasRef.current.getContext('2d', { willReadFrequently: true })
@@ -165,15 +196,14 @@ let Upload = forwardRef(({ bgColor, defaultFillColor, onChange }, ref) => {
       0, 0,
       cropDim, pixelDim)
 
-    let pixelsString = ''
-    for (let j = 0; j < 8; j++) {
-      for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
         let setPixelColor = (ctx, jPixel) => {
           let iPixel = i - 2
           let rgbas = ctx.getImageData(iPixel * pixelDim, jPixel * pixelDim, pixelDim, pixelDim).data
           let rgba = getDominantColor(rgbas)
-          pixelsString = rgbaToHexString(rgba) + pixelsString
-          pixelCtx.fillStyle = `rgba(${rgba.join(',')})`
+          pixelColors[i][j] = rgbaToHexString(rgba)
+          pixelCtx.fillStyle = '#' + pixelColors[i][j]
         }
         if (1 < i && i < 6 && 1 < j && j < 6) {
           setPixelColor(cropCtx, j - 2)
@@ -185,7 +215,8 @@ let Upload = forwardRef(({ bgColor, defaultFillColor, onChange }, ref) => {
         pixelCtx.fillRect(i * pixelDim, j * pixelDim, pixelDim, pixelDim)
       }
     }
-    onChange(pixelsString)
+
+    updatePixelsString()
   }, [
     bgColor, img, drag.scale, drag.left, drag.top,
     cropCanvasRef.current, cropCanvasRef2.current, pixelCanvasRef.current,    
@@ -205,7 +236,22 @@ let Upload = forwardRef(({ bgColor, defaultFillColor, onChange }, ref) => {
     height: drag.height === undefined ? undefined : drag.height * drag.scale,
   }
 
-  return (
+  return <>
+    <dialog id={'fg-color-modal-' + index} className="modal">
+      <div className='modal-box bg'>
+        <ColorPicker color={penColor} onChange={setPenColor} /> 
+      </div>
+      <form method='dialog' className='modal-backdrop'>
+        <button>close</button>
+      </form>
+    </dialog>
+    <div className='my-8 flex items-center'>
+      <div className='w-72'>Pen Color:</div>
+      <button className="btn h-4 w-12"
+        style={{ background: penColor.hex }}
+        onClick={() => document.getElementById('fg-color-modal-' + index).showModal()}
+      />
+    </div>
     <div className='flex items-start gap-16'>
       {img ? (
         <div>
@@ -281,9 +327,9 @@ let Upload = forwardRef(({ bgColor, defaultFillColor, onChange }, ref) => {
           <div>Drag & drop it here</div>
         </div>
       )}
-      <canvas ref={pixelCanvasRef} width={dim} height={dim} />
+      <canvas ref={pixelCanvasRef} width={dim} height={dim} onClick={handlePen} />
     </div>
-  )
+  </>
 })
 
 let getDominantColor = rgbas => {
@@ -310,5 +356,7 @@ let getDominantColor = rgbas => {
   })
   return [sr, sg, sb, sa].map(x => x / chosenBin.length)
 }
+
+Upload.displayName = 'Upload'
   
 export default Upload
