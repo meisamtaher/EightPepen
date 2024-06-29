@@ -18,9 +18,9 @@ const NavBar = () => {
     console.log("account: ", account)
   }, [account]);
   return (
-    <nav className='flex space-x-6 px-5 shrink-0 h-20 items-center bg-slate-950'  >
+    <nav className='flex space-x-6 px-5 shrink-0 h-16 items-center bg-slate-950'  >
         <div className='flex flex-row items-center space-x-2 mr-16'>
-          <img src="/logo.png" className='w-9 h-9'/>
+          <img src="/logo.png" className='w-12 h-12'/>
           <Link href={"/"} className="text-white text-lg"> 8Pepen</Link>
         </div>
         <ul className='flex space-x-6'>
