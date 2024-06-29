@@ -9,6 +9,9 @@ import UploadImage from '../Components/UploadImage'
 import { ColorPicker, useColor, ColorService } from 'react-color-palette'
 import "react-color-palette/css";
 
+
+const copyCountArray = [1, 4, 5, 10, 20, 40]
+
 const EightPepenSetMint = () => {
   const [editionType, setEditionType] = useState<string>('numbered')
   const [colorPixels, setColorPixels] = useState<string[]>(Array(6).fill(''))
@@ -26,7 +29,7 @@ const EightPepenSetMint = () => {
       abi: EightPepenFCNFTABI,
       functionName: 'submitSet',
       args: [
-        colors.map(([pixels, bgColor]) => {
+        colors.map(([pixels, bgColor], i) => {
           let secondhalf = BigInt('0x' + pixels.slice(0, 60))
           let firsthalf = BigInt('0x' + pixels.slice(60, 120))
           let bigIntBgColor = Number('0x' + bgColor.hex.slice(1, 7))
@@ -35,7 +38,7 @@ const EightPepenSetMint = () => {
             bgColor: bigIntBgColor,
             setId: BigInt(0),
             revealed: false,
-            count: 80
+            count: copyCountArray[i]
           }
         }), {
           name: setName,
@@ -64,7 +67,7 @@ const EightPepenSetMint = () => {
           <option value='print'>Print Edition</option>
         </select>
       </div>
-      {(editionType === 'print' ? [1, 4, 5, 10, 20, 40] : [1]).map((copies, i) => (
+      {(editionType === 'print' ? copyCountArray : [1]).map((copies, i) => (
         <div key={i} className='mt-16 mb-6'>
           <dialog id={'bg-color-modal-' + i} className="modal">
             <div className="modal-box bg">
