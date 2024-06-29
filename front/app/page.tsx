@@ -1,15 +1,20 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { getTokens, NFT } from './Logic/TokenQueries';
+import { getTokens, getTokensOfOwner, NFT } from './Logic/TokenQueries';
 import Link from 'next/link';
+import { useAccount } from 'wagmi';
 
 const MainPage = () => {
     const [NFTs, setNFTS] = useState<NFT[]>([]);
+    const account = useAccount();
     useEffect(() => {
         getTokens().then((nfts)=>{
             setNFTS(nfts);
         })
-    }, []);
+        if(account.isConnected){
+            getTokensOfOwner(account!.address!);
+        }
+    }, [account.address]);
   return (
     <div className='flex flex-wrap p-4 gap-8'>
         {NFTs.map(nft=>(
