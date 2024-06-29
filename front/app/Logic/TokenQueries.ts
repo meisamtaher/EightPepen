@@ -71,7 +71,7 @@ export const getTokensOfOwner = async(address:Address):Promise<NFT[]>=>{
         console.log("response for all NFTS: ", response);
         let tempNFTs:NFT[]=[];
         // for( let i=0;i<response.nfts.length;i++){ 
-        //   let nft:NFT = {} as NFT;
+        //   let nft:NFT = {} as NFT; 
         //   nft.id = Number(response.nfts[i].tokenId);
         //   nft.name = response.nfts[i].name!;
         //   nft.description = response.nfts[i].description!;
