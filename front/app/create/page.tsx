@@ -12,7 +12,7 @@ import "react-color-palette/css";
 const EightPepenSetMint = () => {
   const [editionType, setEditionType] = useState<string>('numbered')
   const [colorPixels, setColorPixels] = useState<string[]>(Array(6).fill(''))
-  const bgColors = Array(6).fill().map(() => useColor('#121212'))
+  const bgColors = Array(6).fill().map(() => useColor('#121212')) // eslint-disable-line
   const fistUploadRef = useRef()
   const [setName, setSetName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
