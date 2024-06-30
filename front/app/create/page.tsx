@@ -2,7 +2,7 @@
 'use client'
 import React, { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { EightPepenFCRenderer, EightPepenFCContractAddress } from '../Constants/Contracts'
+import { EightPepenFCRenderer, EightPepenFCContractAddress, EightPepenFCCircularRenderer } from '../Constants/Contracts'
 import { EightPepenFCNFTABI } from "../ABIs/EightPepenFCNFTABI"
 import { useWriteContract } from 'wagmi'
 import { parseEther } from 'viem'
@@ -17,6 +17,7 @@ const copyCountArray = [1, 4, 5, 10, 20, 40]
 const EightPepenSetMint = () => {
   const router = useRouter()
   const [loading, setLoading] = useState<boolean>(false)
+  const [renderer, setRenderer] = useState<string>('default')
   const [editionType, setEditionType] = useState<string>('numbered')
   const [colorPixels, setColorPixels] = useState<string[]>(Array(6).fill(''))
   const bgColors = Array(6).fill().map(() => useColor('#121212')) // eslint-disable-line
@@ -43,13 +44,13 @@ const EightPepenSetMint = () => {
             bgColor: bigIntBgColor,
             setId: BigInt(0),
             revealed: false,
-            count: editionType === 'numbered' ? 80 : copyCountArray[i]
+            count: editionType === 'numbered' ? 1 : copyCountArray[i]
           }
         }), {
           name: setName,
           description,
-          renderer: EightPepenFCRenderer,
-          hasRenderer: false
+          renderer: renderer === 'circular' ? EightPepenFCCircularRenderer : EightPepenFCRenderer,
+          hasRenderer: renderer !== 'default'
         }
       ]
     })
@@ -114,6 +115,13 @@ const EightPepenSetMint = () => {
       <div className='flex items-center'>
         <div className='my-4 w-52 text-xs'>Description:</div>
         <input className='p-3' value={description} onChange={e => setDescription(e.target.value)} />
+      </div>
+      <div className='flex items-center'>
+        <div className='my-4 w-52 text-xs'>Renderer:</div>
+        <select className='p-4 text-xs' value={renderer} onChange={e => setRenderer(e.target.value)}>
+          <option value='default'>Default</option>
+          <option value='circular'>Circular</option>
+        </select>
       </div>
       <div className='mt-8 flex gap-4'>
         <button className='p-4 w-64 text-black bg-white' onClick={() => updateEditionType('numbered')}>Cancel</button>
