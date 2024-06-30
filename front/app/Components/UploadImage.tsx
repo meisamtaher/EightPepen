@@ -19,8 +19,6 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
   let cropCanvasRef = useRef()
   let cropCanvasRef2 = useRef()
   let pixelCanvasRef = useRef()
-  let pixelColorsRef = useRef(Array(8).fill().map(() => Array(8).fill()))
-  let pixelColors = pixelColorsRef.current
   let dragRef = useRef({ scale: 0 })
   let drag = dragRef.current
   useImperativeHandle(ref, () => ({
@@ -31,6 +29,16 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
       setImg(null)
     }
   }), [])
+  let pixelColorsRef = useRef()
+
+  let isIJInside = (i, j) => (1 < i && i < 6 && ((1 < j && j < 6) || j === 7))
+
+  if (!pixelColorsRef.current) {
+    pixelColorsRef.current = Array(8).fill().map((_, i) => Array(8).fill().map((_, j) => (
+      (isIJInside(i, j) ? defaultFillColor.slice(1) : null) // assuming full hex
+    )))
+  }
+  let pixelColors = pixelColorsRef.current
 
   let minScale = Math.max(cropDim / drag.width, (cropDim + sideDim) / drag.height) || 0
 
@@ -115,8 +123,6 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
     )
   }
 
-  let isIJInside = (i, j) => (1 < i && i < 6 && ((1 < j && j < 6) || j === 7))
-
   let handlePen = e => {
     let i = Math.floor(e.nativeEvent.offsetX / pixelDim)
     let j = Math.floor(e.nativeEvent.offsetY / pixelDim)
@@ -135,6 +141,7 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
       for (let i = 0; i < 8; i++)
         if (isIJInside(i, j))
           pixelsString = pixelColors[i][j] + pixelsString
+    console.log(pixelsString)
     onChange(pixelsString)
   }
 
@@ -161,21 +168,19 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
   useEffect(() => {
     if (!pixelCanvasRef.current)
       return
-
     let pixelCtx = pixelCanvasRef.current.getContext('2d')
-
-    if (!img) {
-      for (let i = 0; i < 8; i++) {
-        for (let j = 0; j < 8; j++) {
-          pixelCtx.fillStyle = isIJInside(i, j) ? defaultFillColor : bgColor
-          pixelColors[i][j] = pixelCtx.fillStyle.slice(1) // assuming hex
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        if (!isIJInside(i, j)) {
+          pixelCtx.fillStyle = bgColor
           pixelCtx.fillRect(i * pixelDim, j * pixelDim, pixelDim, pixelDim)
         }
       }
-      return
     }
+}, [bgColor, pixelCanvasRef.current])
 
-    if (!cropCanvasRef.current || !cropCanvasRef2.current)
+  useEffect(() => {
+    if (!img || !cropCanvasRef.current || !cropCanvasRef2.current || !pixelCanvasRef.current)
       return
 
     let cropCtx = cropCanvasRef.current.getContext('2d', { willReadFrequently: true })
@@ -196,6 +201,7 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
       0, 0,
       cropDim, pixelDim)
 
+    let pixelCtx = pixelCanvasRef.current.getContext('2d')
     for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 8; j++) {
         let setPixelColor = (ctx, jPixel) => {
@@ -218,7 +224,7 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
 
     updatePixelsString()
   }, [
-    bgColor, img, drag.scale, drag.left, drag.top,
+    img, drag.scale, drag.left, drag.top,
     cropCanvasRef.current, cropCanvasRef2.current, pixelCanvasRef.current,    
   ])
 
