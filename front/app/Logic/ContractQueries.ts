@@ -69,8 +69,8 @@ export const getSubmissionSets = async():Promise<Set[]>=>{
           let tempSets:Set[]=[];
           let batchFns = []
           for( let i=1;i<=totalSets;i++){ 
-            console.log("get URI:",i);
             batchFns.push(async () => {
+              console.log("get URI:",i);
               const SetDetails = await publicClient.readContract({
                 address: EightPepenFCContractAddress,
                 abi: EightPepenFCNFTABI,
@@ -83,7 +83,7 @@ export const getSubmissionSets = async():Promise<Set[]>=>{
               }
               tempSets.push(temp);
             })
-            await batch(batchFns)
+            await batch(batchFns, 5)
           }
         resolve(tempSets);
     })
