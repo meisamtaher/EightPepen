@@ -4,6 +4,7 @@ import { EightPepenFCContractAddress } from "../Constants/Contracts";
 import { publicClient } from "../Util/client";
 import { Address, parseAbiItem } from "viem";
 import { alchemy } from "../Util/alchemy";
+import { batch } from "../Util/batch";
 import { Utils } from "alchemy-sdk";
 import { } from "wagmi";
 
@@ -66,20 +67,23 @@ export const getSubmissionSets = async():Promise<Set[]>=>{
             return EightPepenInterface.parseLog(log)
           })
           let tempSets:Set[]=[];
+          let batchFns = []
           for( let i=1;i<=totalSets;i++){ 
             console.log("get URI:",i);
-      
-            const SetDetails = await publicClient.readContract({
-              address: EightPepenFCContractAddress,
-              abi: EightPepenFCNFTABI,
-              functionName: 'sets',
-              args:[BigInt(i)]
+            batchFns.push(async () => {
+              const SetDetails = await publicClient.readContract({
+                address: EightPepenFCContractAddress,
+                abi: EightPepenFCNFTABI,
+                functionName: 'sets',
+                args:[BigInt(i)]
+              })
+              let temp:Set = {id:i,name:SetDetails[0],description:SetDetails[1],owner:'0x0'};
+              if(parsedLogs[i-1] && parsedLogs[i-1].args[0]== BigInt(i)){
+                temp.owner = parsedLogs[i-1].args[1];
+              }
+              tempSets.push(temp);
             })
-            let temp:Set = {id:i,name:SetDetails[0],description:SetDetails[1],owner:'0x0'};
-            if(parsedLogs[i-1] && parsedLogs[i-1].args[0]== BigInt(i)){
-              temp.owner = parsedLogs[i-1].args[1];
-            }
-            tempSets.push(temp);
+            await batch(batchFns)
           }
         resolve(tempSets);
     })
