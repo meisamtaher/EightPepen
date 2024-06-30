@@ -83,8 +83,8 @@ export const getSubmissionSets = async():Promise<Set[]>=>{
               }
               tempSets.push(temp);
             })
-            await batch(batchFns, 5)
           }
+          await batch(batchFns)
         resolve(tempSets);
     })
     return sets;
@@ -172,42 +172,44 @@ export const getUnrevealedImages = async():Promise<Image[]>=>{
           abi: EightPepenFCNFTABI,
           functionName: 'imageSupply',
         })
+        let batchFns = []
         let tempImages:Image[]=[];
-        for( let i=2;i<=totalSupply;i++){ 
-          console.log("get URI:",i);
-
-          const imageDetails = await publicClient.readContract({
-            address: EightPepenFCContractAddress,
-            abi: EightPepenFCNFTABI,
-            functionName: 'images',
-            args:[BigInt(i)]
+        for( let i=2;i<=totalSupply;i++){
+          batchFns.push(async () => {
+            const imageDetails = await publicClient.readContract({
+              address: EightPepenFCContractAddress,
+              abi: EightPepenFCNFTABI,
+              functionName: 'images',
+              args:[BigInt(i)]
+            })
+            if(!imageDetails[2]){
+              const imageJsonURI = await publicClient.readContract({
+                  address: EightPepenFCContractAddress,
+                  abi: EightPepenFCNFTABI,
+                  functionName: 'imageURI',
+                  args:[BigInt(i),BigInt(i)]
+                })
+                const votes  = await publicClient.readContract({
+                  address: EightPepenFCContractAddress,
+                  abi: EightPepenFCNFTABI,
+                  functionName: 'votes',
+                  args:[BigInt(i)]
+                })
+                const json = atob(imageJsonURI.substring(29));
+                const imageJson = JSON.parse(json);
+                let image:Image ={} as Image;
+                image.URI = imageJson;
+                image.id = i;
+                image.votes = votes;
+                image.counts = imageDetails[3]; //counts
+                image.revealed = imageDetails[2];//revealed
+                image.setId = Number(imageDetails[1]);
+                tempImages.push(image);
+            }
+            console.log("get URI:",i);
           })
-          if(!imageDetails[2]){
-            const imageJsonURI = await publicClient.readContract({
-                address: EightPepenFCContractAddress,
-                abi: EightPepenFCNFTABI,
-                functionName: 'imageURI',
-                args:[BigInt(i),BigInt(i)]
-              })
-              const votes  = await publicClient.readContract({
-                address: EightPepenFCContractAddress,
-                abi: EightPepenFCNFTABI,
-                functionName: 'votes',
-                args:[BigInt(i)]
-              })
-              const json = atob(imageJsonURI.substring(29));
-              const imageJson = JSON.parse(json);
-              let image:Image ={} as Image;
-              image.URI = imageJson;
-              image.id = i;
-              image.votes = votes;
-              image.counts = imageDetails[3]; //counts
-              image.revealed = imageDetails[2];//revealed
-              image.setId = Number(imageDetails[1]);
-              tempImages.push(image);
-          }
-
         }
+        await batch(batchFns)
         resolve(tempImages);
     })
     return images;
