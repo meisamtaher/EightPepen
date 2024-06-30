@@ -52,7 +52,7 @@ function Gradient({ children, style, isAnimationDisabled = false }) {
   );
 }
  
-export function BlackCreateWalletButton({ height = 66, width = 200 }) {
+export function BlackCreateWalletButton({ height = 40, width = 200 }) {
   const { connectors, connect } = useConnect();
  
   const minButtonHeight = 48;

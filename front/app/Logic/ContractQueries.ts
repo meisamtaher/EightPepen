@@ -3,6 +3,9 @@ import { EightPepenFCNFTABI } from "../ABIs/EightPepenFCNFTABI";
 import { EightPepenFCContractAddress } from "../Constants/Contracts";
 import { publicClient } from "../Util/client";
 import { Address, parseAbiItem } from "viem";
+import { alchemy } from "../Util/alchemy";
+import { Utils } from "alchemy-sdk";
+import { } from "wagmi";
 
 export interface Set{
     id: number,
@@ -10,22 +13,58 @@ export interface Set{
     description:string,
     owner: Address,
 }
+export const getTotalSupply= async():Promise<number>=>{
+  const totalSupply = new Promise<number>(async(resolve,reject)=>{
+    const totalSupply = await publicClient.readContract({
+      address: EightPepenFCContractAddress,
+      abi: EightPepenFCNFTABI,
+      functionName: 'totalSupply',
+    })
+    resolve(Number(totalSupply))
+  })
+  return totalSupply;
+}
+export const getMaxSupply= async():Promise<number>=>{
+  const maxSupply = new Promise<number>(async(resolve,reject)=>{
+    const maxSupply = await publicClient.readContract({
+      address: EightPepenFCContractAddress,
+      abi: EightPepenFCNFTABI,
+      functionName: 'maxSupply',
+    })
+    resolve(Number(maxSupply))
+  })
+  return maxSupply;
+}
+export const getMintPrice= async():Promise<number>=>{
+  const mintPrice = new Promise<number>(async(resolve,reject)=>{
+    const mintPrice = await publicClient.readContract({
+      address: EightPepenFCContractAddress,
+      abi: EightPepenFCNFTABI,
+      functionName: 'mintPrice',
+    })
+    resolve(Number(mintPrice)/1e18)
+  })
+  return mintPrice;
+}
 export const getSubmissionSets = async():Promise<Set[]>=>{
     const sets = new Promise<Set[]>(async(resolve,reject)=>{
-        const totalSets = await publicClient.readContract({
+          const totalSets = await publicClient.readContract({
+              address: EightPepenFCContractAddress,
+              abi: EightPepenFCNFTABI,
+              functionName: 'setSupply',
+            })
+          const EightPepenInterface = new Utils.Interface(EightPepenFCNFTABI);
+          const AddSetEvent = EightPepenInterface.encodeFilterTopics('AddSet', []);
+          console.log("FIlter: ", AddSetEvent)
+          const logs = await alchemy.core.getLogs({
+            fromBlock: '0x0',
+            toBlock: 'latest',
             address: EightPepenFCContractAddress,
-            abi: EightPepenFCNFTABI,
-            functionName: 'setSupply',
+            topics: AddSetEvent,
+          });
+          const parsedLogs = logs.map(log=> {
+            return EightPepenInterface.parseLog(log)
           })
-        //   console.log("total Set Supply:", totalSets);
-        //   const logs = await publicClient.getLogs({  
-        //     address: EightPepenFCContractAddress,
-        //     event: parseAbiItem('event AddSet(uint256 indexed, address)'),
-        //     fromBlock: BigInt(11777700),
-        //     toBlock: BigInt(11778758)
-        //   })
-        //   console.log("logs:", logs);
-        //   console.log("Mint logs:", logs)
           let tempSets:Set[]=[];
           for( let i=1;i<=totalSets;i++){ 
             console.log("get URI:",i);
@@ -36,13 +75,10 @@ export const getSubmissionSets = async():Promise<Set[]>=>{
               functionName: 'sets',
               args:[BigInt(i)]
             })
-            // const Address = await publicClient.readContract({
-            //   address: EightPepenFCSetContractAddress,
-            //   abi: EightPepenFCSetNFTABI,
-            //   functionName: 'ownerOf',
-            //   args:[BigInt(i)]
-            // })
-            let temp:Set = {id:i,name:SetDetails[0],description:SetDetails[1],owner:'0x1231231123123123'};
+            let temp:Set = {id:i,name:SetDetails[0],description:SetDetails[1],owner:'0x0'};
+            if(parsedLogs[i-1] && parsedLogs[i-1].args[0]== BigInt(i)){
+              temp.owner = parsedLogs[i-1].args[1];
+            }
             tempSets.push(temp);
           }
         resolve(tempSets);
