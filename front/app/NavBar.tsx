@@ -19,15 +19,13 @@ const NavBar = () => {
   }, [account]);
   return (
     <nav className='flex space-x-6 px-5 shrink-0 h-16 items-center bg-slate-950'  >
-        <div className='flex flex-row items-center space-x-2 mr-16'>
-          <img src="/logo.png" className='w-12 h-12'/>
+        <div className='flex flex-row items-center mr-16'>
           <Link href={"/"} className="text-white text-lg"> 8Pepen</Link>
         </div>
         <ul className='flex space-x-6'>
             {links.map(link=>
-            <div className='flex flex-row space-x-1 items-center border border-gray-700 border-r-2 p-2' key={link.label}>
-              {/* <img src={link.img}/> */}
-              <Link className="text-white text-sm transition-colors" href={link.href} >{link.label}</Link>
+            <div className='flex items-center bg-white px-3 py-2' key={link.label}>
+              <Link className="text-sm" href={link.href} >{link.label}</Link>
             </div> 
             )}
         </ul>
