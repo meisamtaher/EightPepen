@@ -10,11 +10,12 @@ let cropDim = dim / 2
 let sideDim = dim / 4
 let pixelDim = dim / 8
 
-let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) => {
+let Upload = forwardRef(({ index, bgColor, defaultFillColor, renderer, onChange }, ref) => {
   let update = useUpdate()
   let [img, setImg] = useState()
   let [maxScale, setMaxScale] = useState()
   let [penColor, setPenColor] = useColor('#f00')
+  let [isPicking, setIsPicking] = useState(false)
   let cropRef = useRef()
   let imgRef = useRef()
   let cropCanvasRef = useRef()
@@ -119,13 +120,6 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
     )
   }
 
-  let handlePen = (i, j) => () => {
-    if (isIJInside(i, j)) {
-      data.pixelColors[i][j] = penColor.hex.slice(1)
-      updatePixelsString()
-    }
-  }
-
   let updatePixelsString = () => {
     update()
     let pixelsString = ''
@@ -222,7 +216,39 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
   let renderPixels = () => data.pixelColors?.map((row, i) => row.map((color, j) => {
     if (!isIJInside(i, j))
       return []
-    return <rect key={i + '-' + j} width={1} height={1} x={i} y={j} fill={'#' + color} onClick={handlePen(i, j)} />
+    let props = {
+      key: i + '-' + j,
+      fill: '#' + color,
+      onClick: () => {
+        if (isPicking) {
+          setPenColor(ColorService.convert('hex', '#' + data.pixelColors[i][j]))
+          setIsPicking(false)
+          return
+        }
+        if (isIJInside(i, j)) {
+          data.pixelColors[i][j] = penColor.hex.slice(1)
+          updatePixelsString()
+        }
+      }
+    }
+    if (renderer === 'cool') {
+      let start = `m ${i} ${j} `
+      let tl = start + 'm  1  1   l   -1  0   a 1 1 0 0 1    1 -1  z'
+      let tr = start + 'm  0  1   l    0 -1   a 1 1 0 0 1    1  1  z'
+      let bl = start + 'm  1  0   l    0  1   a 1 1 0 0 1   -1 -1  z'
+      let br = start + 'm  0  0   l    1  0   a 1 1 0 0 1   -1  1  z'
+      if ((i == 4 && j == 2) || (i == 2 && j == 7))
+        return <path {...props} d={tl} />
+      if ((i == 3 && j == 2) || (i == 5 && j == 2) || (i == 5 && j == 7))
+        return <path {...props} d={tr} />
+      if ((i == 2 && j == 3) || (i == 4 && j == 3) || (i == 2 && j == 5))
+        return <path {...props} d={bl} />
+      if ((i == 3 && j == 3) || (i == 5 && j == 3) || (i == 5 && j == 5))
+        return <path {...props} d={br} />
+    }
+    if (renderer === 'circular')
+      return <circle {...props} r={0.5} cx={i + 0.5} cy={j + 0.5} />
+    return <rect {...props} width={1} height={1} x={i} y={j} />
   }))
 
   return <>
@@ -236,10 +262,17 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
     </dialog>
     <div className='mt-2 mb-12 flex items-center'>
       <div className='w-56 text-xs'>Pen Color:</div>
-      <button className="btn h-4 w-12"
+      <button className='btn h-4 w-12'
         style={{ background: penColor.hex }}
         onClick={() => document.getElementById('fg-color-modal-' + index).showModal()}
       />
+      <div
+        className='ml-2 cursor-pointer'
+        style={{ textShadow: isPicking ? '0 4px 4px rgb(0 0 0)' : '' }}
+        onClick={() => setIsPicking(!isPicking)}
+      >
+        pick
+      </div>
     </div>
     <div className='flex items-start gap-16'>
       {img ? (
