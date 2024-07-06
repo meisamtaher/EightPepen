@@ -10,37 +10,46 @@ let cropDim = dim / 2
 let sideDim = dim / 4
 let pixelDim = dim / 8
 
-let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) => {
+let Upload = forwardRef(({ index, bgColor, defaultFillColor, renderer, onChange }, ref) => {
   let update = useUpdate()
   let [img, setImg] = useState()
+  let [maxScale, setMaxScale] = useState()
   let [penColor, setPenColor] = useColor('#f00')
+  let [isPicking, setIsPicking] = useState(false)
   let cropRef = useRef()
   let imgRef = useRef()
   let cropCanvasRef = useRef()
   let cropCanvasRef2 = useRef()
-  let pixelCanvasRef = useRef()
-  let dragRef = useRef({ scale: 0 })
-  let drag = dragRef.current
+  let dataRef = useRef({ scale: 0 })
+  let data = dataRef.current
   useImperativeHandle(ref, () => ({
     reset: () => {
       setPenColor(ColorService.convert('hex', '#f00'))
-      pixelColorsRef.current = Array(8).fill().map(() => Array(8).fill())
-      dragRef.current = { scale: 0 }
       setImg(null)
+      dataRef.current = { scale: 0 }
     }
   }), [])
-  let pixelColorsRef = useRef()
 
   let isIJInside = (i, j) => (1 < i && i < 6 && ((1 < j && j < 6) || j === 7))
 
-  if (!pixelColorsRef.current) {
-    pixelColorsRef.current = Array(8).fill().map((_, i) => Array(8).fill().map((_, j) => (
-      (isIJInside(i, j) ? defaultFillColor.slice(1) : null) // assuming full hex
-    )))
-  }
-  let pixelColors = pixelColorsRef.current
 
-  let minScale = Math.max(cropDim / drag.width, (cropDim + sideDim) / drag.height) || 0
+  let minScale = Math.max(cropDim / data.width, (cropDim + sideDim) / data.height) || 0
+
+  let updateDrag = props => {
+    Object.assign(data, props)
+    if (!isNaN(minScale)) {
+      data.scale = Math.max(minScale, data.scale)
+    }
+    if (props.left != null) {
+      data.left = Math.max(Math.min(data.left, sideDim),
+        sideDim + cropDim - data.width * data.scale)
+    }
+    if (props.top != null) {
+      data.top = Math.max(Math.min(data.top, sideDim),
+        dim - data.height * data.scale)
+    }
+    update()
+  }
 
   let handleLoad = () => {
     let { width, height } = imgRef.current
@@ -54,37 +63,21 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
     })
   }
 
-  let updateDrag = props => {
-    Object.assign(drag, props)
-    if (!isNaN(minScale)) {
-      drag.scale = Math.max(minScale, drag.scale)
-    }
-    if (props.left != null) {
-      drag.left = Math.max(Math.min(drag.left, sideDim),
-        sideDim + cropDim - drag.width * drag.scale)
-    }
-    if (props.top != null) {
-      drag.top = Math.max(Math.min(drag.top, sideDim),
-        dim - drag.height * drag.scale)
-    }
-    update()
-  }
-
   let startDrag = e => {
     e.preventDefault()
     e.stopPropagation()
     updateDrag({
       active: true,
-      x: e.pageX - drag.left,
-      y: e.pageY - drag.top,
+      x: e.pageX - data.left,
+      y: e.pageY - data.top,
     })
   }
 
   let performDrag = e => {
-    if (drag.active && e.pageX != null) {
+    if (data.active && e.pageX != null) {
       updateDrag({
-        left: e.pageX - drag.x,
-        top: e.pageY - drag.y,
+        left: e.pageX - data.x,
+        top: e.pageY - data.y,
       })
     }
   }
@@ -95,19 +88,23 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
   }
 
   let updateScale = (scale, left, top) => {
-    if (drag.scale === minScale && scale <= minScale)
+    if (data.scale === minScale && scale <= minScale)
       return
-    let ratio = scale / drag.scale
+    let ratio = scale / data.scale
     updateDrag({
       scale,
-      left: left + (drag.left - left) * ratio,
-      top: top + (drag.top - top) * ratio,
+      left: left + (data.left - left) * ratio,
+      top: top + (data.top - top) * ratio,
     })
-    clearTimeout(drag.scaleTimeout)
-    drag.scaleTimeout = setTimeout(() => {
-      updateDrag({ maxScale: 2 * drag.scale })
+    clearTimeout(data.scaleTimeout)
+    data.scaleTimeout = setTimeout(() => {
+      setMaxScale(2 * data.scale)
     }, 1000)
   }
+
+  let handleTouchStart = ({ changedTouches: [e] }) => startDrag(e)
+  let handleTouchMove = ({ changedTouches: [e] }) => performDrag(e)
+  let handleTouchEnd = ({ changedTouches: [e] }) => endDrag(e)
 
   let handleWheel = e => {
     if (!e.ctrlKey && !e.metaKey)
@@ -117,44 +114,39 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
 
     let { left, top } = cropRef.current.getBoundingClientRect()
     updateScale(
-      drag.scale * Math.exp(Math.sign(e.deltaY) * -0.2),
+      data.scale * Math.exp(Math.sign(e.deltaY) * -0.2),
       e.pageX - left,
       e.pageY - top,
     )
   }
 
-  let handlePen = e => {
-    let i = Math.floor(e.nativeEvent.offsetX / pixelDim)
-    let j = Math.floor(e.nativeEvent.offsetY / pixelDim)
-    if (!isIJInside(i, j))
-      return
-    let pixelCtx = pixelCanvasRef.current.getContext('2d')
-    pixelCtx.fillStyle = penColor.hex
-    pixelCtx.fillRect(i * pixelDim, j * pixelDim, pixelDim, pixelDim)
-    pixelColors[i][j] = penColor.hex.slice(1)
-    updatePixelsString()
-  }
-
   let updatePixelsString = () => {
+    update()
     let pixelsString = ''
     for (let j = 0; j < 8; j++)
       for (let i = 0; i < 8; i++)
         if (isIJInside(i, j))
-          pixelsString = pixelColors[i][j] + pixelsString
-    console.log(pixelsString)
+          pixelsString = data.pixelColors[i][j] + pixelsString
     onChange(pixelsString)
   }
 
   useEffect(() => {
+    data.pixelColors = [...Array(8).keys()].map(i => [...Array(8).keys()].map(j => (
+      (isIJInside(i, j) ? defaultFillColor.slice(1) : null) // assuming full hex
+    )))
+    window.addEventListener('touchmove', handleTouchMove)
+    window.addEventListener('touchend', handleTouchEnd)
     window.addEventListener('mousemove', performDrag)
     window.addEventListener('mouseup', endDrag)
     window.addEventListener('blur', endDrag)
     return () => {
+      window.removeEventListener('touchmove', handleTouchMove)
+      window.removeEventListener('touchend', handleTouchEnd)
       window.removeEventListener('mousemove', performDrag)
       window.removeEventListener('mouseup', endDrag)
       window.removeEventListener('blur', endDrag)
     }
-  }, [dragRef.current])
+  }, [dataRef.current])
 
   useEffect(() => {
     let el = imgRef.current
@@ -166,66 +158,45 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
   }, [imgRef.current, minScale])
 
   useEffect(() => {
-    if (!pixelCanvasRef.current)
-      return
-    let pixelCtx = pixelCanvasRef.current.getContext('2d')
-    for (let i = 0; i < 8; i++) {
-      for (let j = 0; j < 8; j++) {
-        if (!isIJInside(i, j)) {
-          pixelCtx.fillStyle = bgColor
-          pixelCtx.fillRect(i * pixelDim, j * pixelDim, pixelDim, pixelDim)
-        }
-      }
-    }
-}, [bgColor, pixelCanvasRef.current])
-
-  useEffect(() => {
-    if (!img || !cropCanvasRef.current || !cropCanvasRef2.current || !pixelCanvasRef.current)
+    if (!img || !cropCanvasRef.current || !cropCanvasRef2.current)
       return
 
     let cropCtx = cropCanvasRef.current.getContext('2d', { willReadFrequently: true })
     cropCtx.drawImage(imgRef.current,
-      (sideDim - drag.left) / drag.scale,
-      (sideDim - drag.top) / drag.scale,
-      cropDim / drag.scale,
-      cropDim / drag.scale,
+      (sideDim - data.left) / data.scale,
+      (sideDim - data.top) / data.scale,
+      cropDim / data.scale,
+      cropDim / data.scale,
       0, 0,
       cropDim, cropDim)
 
     let cropCtx2 = cropCanvasRef2.current.getContext('2d', { willReadFrequently: true })
     cropCtx2.drawImage(imgRef.current,
-      (sideDim - drag.left) / drag.scale,
-      (sideDim + cropDim + pixelDim - drag.top) / drag.scale,
-      cropDim / drag.scale,
-      pixelDim / drag.scale,
+      (sideDim - data.left) / data.scale,
+      (sideDim + cropDim + pixelDim - data.top) / data.scale,
+      cropDim / data.scale,
+      pixelDim / data.scale,
       0, 0,
       cropDim, pixelDim)
 
-    let pixelCtx = pixelCanvasRef.current.getContext('2d')
     for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 8; j++) {
-        let setPixelColor = (ctx, jPixel) => {
+        let setDominantColor = (ctx, jPixel) => {
           let iPixel = i - 2
           let rgbas = ctx.getImageData(iPixel * pixelDim, jPixel * pixelDim, pixelDim, pixelDim).data
-          let rgba = getDominantColor(rgbas)
-          pixelColors[i][j] = rgbaToHexString(rgba)
-          pixelCtx.fillStyle = '#' + pixelColors[i][j]
+          data.pixelColors[i][j] = rgbaToHexString(getDominantColor(rgbas))
         }
-        if (1 < i && i < 6 && 1 < j && j < 6) {
-          setPixelColor(cropCtx, j - 2)
-        } else if (1 < i && i < 6 && j === 7) {
-          setPixelColor(cropCtx2, 0)
-        } else {
-          pixelCtx.fillStyle = bgColor
-        }
-        pixelCtx.fillRect(i * pixelDim, j * pixelDim, pixelDim, pixelDim)
+        if (1 < i && i < 6 && 1 < j && j < 6)
+          setDominantColor(cropCtx, j - 2)
+        else if (1 < i && i < 6 && j === 7)
+          setDominantColor(cropCtx2, 0)
       }
     }
 
     updatePixelsString()
   }, [
-    img, drag.scale, drag.left, drag.top,
-    cropCanvasRef.current, cropCanvasRef2.current, pixelCanvasRef.current,    
+    img, data.scale, data.left, data.top,
+    cropCanvasRef.current, cropCanvasRef2.current    
   ])
 
   let { getRootProps, getInputProps } = useDropzone({
@@ -236,11 +207,51 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
   let imgSrc = useMemo(() => img && URL.createObjectURL(img), [img])
 
   let imgStyle = {
-    top: drag.top,
-    left: drag.left,
-    width: drag.width === undefined ? undefined : drag.width * drag.scale,
-    height: drag.height === undefined ? undefined : drag.height * drag.scale,
+    top: data.top,
+    left: data.left,
+    width: data.width === undefined ? undefined : data.width * data.scale,
+    height: data.height === undefined ? undefined : data.height * data.scale,
   }
+
+  let renderPixels = () => data.pixelColors?.map((row, i) => row.map((color, j) => {
+    if (!isIJInside(i, j))
+      return []
+    let props = {
+      key: i + '-' + j,
+      fill: '#' + color,
+      onClick: () => {
+        if (isPicking) {
+          setPenColor(ColorService.convert('hex', '#' + data.pixelColors[i][j]))
+          setIsPicking(false)
+          return
+        }
+        if (isIJInside(i, j)) {
+          data.pixelColors[i][j] = penColor.hex.slice(1)
+          updatePixelsString()
+        }
+      }
+    }
+    /* eslint-disable react/jsx-key */
+    if (renderer === 'cool') {
+      let start = `m ${i} ${j} `
+      let tl = start + 'm  1  1   l   -1  0   a 1 1 0 0 1    1 -1  z'
+      let tr = start + 'm  0  1   l    0 -1   a 1 1 0 0 1    1  1  z'
+      let bl = start + 'm  1  0   l    0  1   a 1 1 0 0 1   -1 -1  z'
+      let br = start + 'm  0  0   l    1  0   a 1 1 0 0 1   -1  1  z'
+      if ((i === 4 && j === 2) || (i === 2 && j === 7))
+        return <path {...props} d={tl} />
+      if ((i === 3 && j === 2) || (i === 5 && j === 2) || (i === 5 && j === 7))
+        return <path {...props} d={tr} />
+      if ((i === 2 && j === 3) || (i === 4 && j === 3) || (i === 2 && j === 5))
+        return <path {...props} d={bl} />
+      if ((i === 3 && j === 3) || (i === 5 && j === 3) || (i === 5 && j === 5))
+        return <path {...props} d={br} />
+    }
+    if (renderer === 'circular')
+      return <circle {...props} r={0.5} cx={i + 0.5} cy={j + 0.5} />
+    return <rect {...props} width={1} height={1} x={i} y={j} />
+    /* eslint-enable react/jsx-key */
+  }))
 
   return <>
     <dialog id={'fg-color-modal-' + index} className="modal">
@@ -253,10 +264,17 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
     </dialog>
     <div className='mt-2 mb-12 flex items-center'>
       <div className='w-56 text-xs'>Pen Color:</div>
-      <button className="btn h-4 w-12"
+      <button className='btn h-4 w-12'
         style={{ background: penColor.hex }}
         onClick={() => document.getElementById('fg-color-modal-' + index).showModal()}
       />
+      <div
+        className='ml-2 cursor-pointer'
+        style={{ textShadow: isPicking ? '0 4px 4px rgb(0 0 0)' : '' }}
+        onClick={() => setIsPicking(!isPicking)}
+      >
+        pick
+      </div>
     </div>
     <div className='flex items-start gap-16'>
       {img ? (
@@ -273,6 +291,7 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
               style={imgStyle}
               onLoad={handleLoad}
               onMouseDown={startDrag}
+              onTouchSart={handleTouchStart}
             />
             <div className='absolute opacity-70 pointer-events-none' style={{ ...imgStyle, background: bgColor }} />
             <div
@@ -313,11 +332,11 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
               type='range'
               step={0.01}
               min={minScale}
-              max={drag.maxScale || 2 * drag.scale}
-              value={drag.scale}
+              max={maxScale || 2 * data.scale}
+              value={data.scale}
               onChange={e => updateScale(e.target.value, cropDim, cropDim)}
             />
-            {' '}scale: {drag.scale.toFixed(3)}
+            {' '}scale: {data.scale.toFixed(3)}
           </div>
         </div>
       ) : (
@@ -333,7 +352,10 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, onChange }, ref) =>
           <div>Drag & drop it here</div>
         </div>
       )}
-      <canvas ref={pixelCanvasRef} width={dim} height={dim} onClick={handlePen} />
+      <svg width={dim} height={dim} viewBox='0 0 8 8' shapeRendering='geometricPrecision'>
+        <rect width='100%' height='100%' fill={bgColor} />
+        {renderPixels()}
+      </svg>
     </div>
   </>
 })
