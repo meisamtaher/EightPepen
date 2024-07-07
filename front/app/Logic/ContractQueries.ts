@@ -209,7 +209,7 @@ export const getUnrevealedImages = async():Promise<Image[]>=>{
             console.log("get URI:",i);
           })
         }
-        await batch(batchFns)
+        await batch(batchFns,10,false)
         resolve(tempImages);
     })
     return images;
