@@ -2,7 +2,7 @@
 'use client'
 import React, { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { EightPepenFCRenderer, EightPepenFCContractAddress, EightPepenFCCircularRenderer } from '../Constants/Contracts'
+import { EightPepenFCRenderer, EightPepenFCContractAddress, EightPepenFCCircularRenderer, EightPepenFCOpepenRenderer } from '../Constants/Contracts'
 import { EightPepenFCNFTABI } from "../ABIs/EightPepenFCNFTABI"
 import { useWriteContract } from 'wagmi'
 import { parseEther } from 'viem'
@@ -52,7 +52,7 @@ const EightPepenSetMint = () => {
         }), {
           name: setName,
           description,
-          renderer: renderer === 'circular' ? EightPepenFCCircularRenderer : EightPepenFCRenderer,
+          renderer: renderer === 'circular' ? EightPepenFCCircularRenderer :renderer === 'cool'? EightPepenFCOpepenRenderer: EightPepenFCRenderer,
           hasRenderer: renderer !== 'default'
         }
       ]
