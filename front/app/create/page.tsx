@@ -6,9 +6,10 @@ import { EightPepenFCRenderer, EightPepenFCContractAddress, EightPepenFCCircular
 import { EightPepenFCNFTABI } from "../ABIs/EightPepenFCNFTABI"
 import { useWriteContract } from 'wagmi'
 import { parseEther } from 'viem'
+import ColorPicker from '../Components/ColorPicker'
 import UploadImage from '../Components/UploadImage'
 import Loader from '../Components/Loader'
-import { ColorPicker, useColor, ColorService } from 'react-color-palette'
+import { useColor, ColorService } from 'react-color-palette'
 import "react-color-palette/css";
 
 
@@ -21,6 +22,8 @@ const EightPepenSetMint = () => {
   const [editionType, setEditionType] = useState<string>('numbered')
   const [colorPixels, setColorPixels] = useState<string[]>(Array(6).fill(''))
   const bgColors = Array(6).fill().map(() => useColor('#121212')) // eslint-disable-line
+  const penColors = Array(6).fill().map(() => useColor('#f00')) // eslint-disable-line
+  const [picking, setPicking] = useState({})
   const fistUploadRef = useRef()
   const [setName, setSetName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
@@ -68,6 +71,14 @@ const EightPepenSetMint = () => {
     fistUploadRef.current?.reset()
     setColorPixels(Array(6).fill(''))
     bgColors.forEach(([_, set]) => set(ColorService.convert('hex', '#121212')))
+    penColors.forEach(([_, set]) => set(ColorService.convert('hex', '#f00')))
+  }
+
+  const handlePickColor = color => {
+    if (!picking.type)
+      return
+    (picking.type === 'bg' ? bgColors: penColors)[picking.i][1](ColorService.convert('hex', color));
+    setPicking({})
   }
 
   if (loading) {
@@ -96,20 +107,33 @@ const EightPepenSetMint = () => {
       {(editionType === 'print' ? copyCountArray : [1]).map((copies, i) => (
         <div key={i} className='mt-4 mb-4'>
           <div className='mb-16 border-t-4 border-black' />
-          <dialog id={'bg-color-modal-' + i} className="modal">
-            <div className="modal-box bg">
-              <ColorPicker color={bgColors[i][0]} onChange={bgColors[i][1]} /> 
-            </div>
-            <form method="dialog" className="modal-backdrop">
-              <button>close</button>
-            </form>
-          </dialog>
           <div className='mb-4 text-xl'>{copies + (copies === 1 ? ' Copy' : ' Copies')}</div>
-          <div className='flex items-center'>
-            <div className='w-56 text-xs'>Background Color:</div>
-            <button className="btn h-4 w-12 text-xs" style={{background: bgColors[i][0].hex}} onClick={() => document?.getElementById('bg-color-modal-' + i).showModal()} />
-          </div>
-          <UploadImage index={i} ref={i === 0 ? fistUploadRef : undefined} bgColor={bgColors[i][0].hex} defaultFillColor='#D9D9D9' renderer={renderer} onChange={p => {setColorPixels([...colorPixels.slice(0, i), p, ...colorPixels.slice(i + 1)])}} />
+          <ColorPicker
+            title='Background Color'
+            color={bgColors[i][0]}
+            onChange={bgColors[i][1]}
+            isPicking={picking.i === i && picking.type === 'bg'}
+            onPick={isPicking => setPicking(isPicking ? { i, type: 'bg' } : {})}
+          />
+          <div className='mt-2' />
+          <ColorPicker
+            title='Pen Color'
+            color={penColors[i][0]}
+            onChange={penColors[i][1]}
+            isPicking={picking.i === i && picking.type === 'pen'}
+            onPick={isPicking => setPicking(isPicking ? { i, type: 'pen' } : {})}
+          />
+          <div className='mt-12' />
+          <UploadImage
+            ref={i === 0 ? fistUploadRef : undefined}
+            defaultFillColor='#D9D9D9'
+            bgColor={bgColors[i][0].hex}
+            penColor={penColors[i][0].hex}
+            isPicking={picking.type}
+            onPick={handlePickColor}
+            renderer={renderer}
+            onChange={p => {setColorPixels([...colorPixels.slice(0, i), p, ...colorPixels.slice(i + 1)])}}
+          />
         </div>
       ))}
       <div className='my-16 border-t-4 border-black' />

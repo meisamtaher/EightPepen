@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { useState, useRef, useEffect, useMemo, useImperativeHandle, forwardRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { ColorPicker, useColor, ColorService } from 'react-color-palette'
 import { rgbaToHexString } from '../Util/converter'
+import ColorPicker from '../Components/ColorPicker'
 import useUpdate from '../hooks/useUpdate'
 
 let dim = 240
@@ -10,12 +10,10 @@ let cropDim = dim / 2
 let sideDim = dim / 4
 let pixelDim = dim / 8
 
-let Upload = forwardRef(({ index, bgColor, defaultFillColor, renderer, onChange }, ref) => {
+let Upload = forwardRef(({ bgColor, defaultFillColor, renderer, onChange, penColor, isPicking, onPick }, ref) => {
   let update = useUpdate()
   let [img, setImg] = useState()
   let [maxScale, setMaxScale] = useState()
-  let [penColor, setPenColor] = useColor('#f00')
-  let [isPicking, setIsPicking] = useState(false)
   let cropRef = useRef()
   let imgRef = useRef()
   let cropCanvasRef = useRef()
@@ -24,7 +22,6 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, renderer, onChange 
   let data = dataRef.current
   useImperativeHandle(ref, () => ({
     reset: () => {
-      setPenColor(ColorService.convert('hex', '#f00'))
       setImg(null)
       dataRef.current = { scale: 0 }
     }
@@ -207,6 +204,7 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, renderer, onChange 
   let imgSrc = useMemo(() => img && URL.createObjectURL(img), [img])
 
   let imgStyle = {
+    touchAction: 'none',
     top: data.top,
     left: data.left,
     width: data.width === undefined ? undefined : data.width * data.scale,
@@ -216,22 +214,20 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, renderer, onChange 
   let renderPixels = () => data.pixelColors?.map((row, i) => row.map((color, j) => {
     if (!isIJInside(i, j))
       return []
+    let key = i + '-' + j
     let props = {
-      key: i + '-' + j,
       fill: '#' + color,
       onClick: () => {
         if (isPicking) {
-          setPenColor(ColorService.convert('hex', '#' + data.pixelColors[i][j]))
-          setIsPicking(false)
+          onPick('#' + data.pixelColors[i][j])
           return
         }
         if (isIJInside(i, j)) {
-          data.pixelColors[i][j] = penColor.hex.slice(1)
+          data.pixelColors[i][j] = penColor.slice(1) // assuming full hex
           updatePixelsString()
         }
       }
     }
-    /* eslint-disable react/jsx-key */
     if (renderer === 'cool') {
       let start = `m ${i} ${j} `
       let tl = start + 'm  1  1   l   -1  0   a 1 1 0 0 1    1 -1  z'
@@ -239,43 +235,20 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, renderer, onChange 
       let bl = start + 'm  1  0   l    0  1   a 1 1 0 0 1   -1 -1  z'
       let br = start + 'm  0  0   l    1  0   a 1 1 0 0 1   -1  1  z'
       if ((i === 4 && j === 2) || (i === 2 && j === 7))
-        return <path {...props} d={tl} />
+        return <path key={key} {...props} d={tl} />
       if ((i === 3 && j === 2) || (i === 5 && j === 2) || (i === 5 && j === 7))
-        return <path {...props} d={tr} />
+        return <path key={key} {...props} d={tr} />
       if ((i === 2 && j === 3) || (i === 4 && j === 3) || (i === 2 && j === 5))
-        return <path {...props} d={bl} />
+        return <path key={key} {...props} d={bl} />
       if ((i === 3 && j === 3) || (i === 5 && j === 3) || (i === 5 && j === 5))
-        return <path {...props} d={br} />
+        return <path key={key} {...props} d={br} />
     }
     if (renderer === 'circular')
-      return <circle {...props} r={0.5} cx={i + 0.5} cy={j + 0.5} />
-    return <rect {...props} width={1} height={1} x={i} y={j} />
-    /* eslint-enable react/jsx-key */
+      return <circle key={key} {...props} r={0.5} cx={i + 0.5} cy={j + 0.5} />
+    return <rect key={key} {...props} width={1} height={1} x={i} y={j} />
   }))
 
   return <>
-    <dialog id={'fg-color-modal-' + index} className="modal">
-      <div className='modal-box bg'>
-        <ColorPicker color={penColor} onChange={setPenColor} /> 
-      </div>
-      <form method='dialog' className='modal-backdrop'>
-        <button>close</button>
-      </form>
-    </dialog>
-    <div className='mt-2 mb-12 flex items-center'>
-      <div className='w-56 text-xs'>Pen Color:</div>
-      <button className='btn h-4 w-12'
-        style={{ background: penColor.hex }}
-        onClick={() => document.getElementById('fg-color-modal-' + index).showModal()}
-      />
-      <div
-        className='ml-2 cursor-pointer'
-        style={{ textShadow: isPicking ? '0 4px 4px rgb(0 0 0)' : '' }}
-        onClick={() => setIsPicking(!isPicking)}
-      >
-        pick
-      </div>
-    </div>
     <div className='flex items-start gap-16'>
       {img ? (
         <div>
@@ -353,7 +326,7 @@ let Upload = forwardRef(({ index, bgColor, defaultFillColor, renderer, onChange 
         </div>
       )}
       <svg width={dim} height={dim} viewBox='0 0 8 8' shapeRendering='geometricPrecision'>
-        <rect width='100%' height='100%' fill={bgColor} />
+        <rect width='100%' height='100%' fill={bgColor} onClick={() => isPicking && onPick(bgColor)} />
         {renderPixels()}
       </svg>
     </div>
