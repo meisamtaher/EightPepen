@@ -2,9 +2,11 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import AddressViewer from "../Components/AddressViewer";
-import { getSubmissionSets,Set } from "../Logic/ContractQueries";
+import { getSetsWithDetails, Set } from "../Logic/ContractQueries";
 import Link from "next/link";
 import Loader from '../Components/Loader'
+import { SetDetails } from "../Logic/SetQueries";
+import SetOverview from "../Components/SetOverview";
  
 
 
@@ -17,10 +19,12 @@ interface NFT{
 }
 export default function Home() {
   const [loading, setLoading] = useState<boolean>(true);
-  const [Sets,setSets] = useState<Set[]>();
+  const [Sets,setSets] = useState<SetDetails[]>();
   const getNFTlist = async()=>{
-    const sets = await getSubmissionSets();
-    setSets(sets)
+    // getSubmissionSets()
+    const setsWithDetails = await getSetsWithDetails();
+    // const sets = await getSubmissionSets();
+    setSets(setsWithDetails)
     setLoading(false)
   }
   useEffect(() => {
@@ -42,6 +46,7 @@ export default function Home() {
                 <a className=" text-xs">{set.name}</a>
                 <a className=" text-xs">{set.description}</a>
                 <div className="grow flex items-end">
+                  <SetOverview set = {set}></SetOverview>
                   <AddressViewer address={set.owner}></AddressViewer>
                 </div>
               </div>

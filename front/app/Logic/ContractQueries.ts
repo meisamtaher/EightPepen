@@ -93,6 +93,7 @@ interface SetDetails{
     id: number,
     name:string,
     description:string,
+    owner:Address,
     images:Image[]
 }
 export interface Image{
@@ -108,62 +109,74 @@ export interface Image{
     }
 }
 export const getSetDetails = async(id:number):Promise<SetDetails>=>{
-    const sets = new Promise<SetDetails>(async(resolve,reject)=>{
-          const logs = await publicClient.getLogs({  
-            address: EightPepenFCContractAddress,
-            event: parseAbiItem('event AddImage(uint256 indexed _id,uint256 indexed _setId, uint16, address artist)'),
-            args:{
-                _setId:BigInt(id)
-            }
-          })
-          console.log("Images:", logs);
-          let tempSets:SetDetails={} as SetDetails;
-        resolve(tempSets);
-    })
-    return sets;
+  const EightPepenInterface = new Utils.Interface(EightPepenFCNFTABI);
+  const AddImageEvent = EightPepenInterface.encodeFilterTopics('AddImage', ["_setId"=id]);
+  console.log("FIlter: ", AddImageEvent)
+  const logs = await alchemy.core.getLogs({
+    fromBlock: '0x0',
+    toBlock: 'latest',
+    address: EightPepenFCContractAddress,
+    topics: AddImageEvent,
+  });
+  const parsedLogs = logs.map(log=> {
+    return EightPepenInterface.parseLog(log)
+  })
+  console.log("Logs:", parsedLogs);
+  // const logs = await publicClient.getLogs({  
+  //   address: EightPepenFCContractAddress,
+  //   event: parseAbiItem('event AddImage(uint256 indexed _id,uint256 indexed _setId, uint16, address artist)'),
+  //   args:{
+  //       _setId:BigInt(id)
+  //   }
+  // })
+  console.log("Images:", parsedLogs);
+  let tempSets:SetDetails={} as SetDetails;
+  return tempSets;
 }
 export const getImages = async():Promise<Image[]>=>{
-    const images = new Promise<Image[]>(async(resolve,reject)=>{
-        const totalSupply = await publicClient.readContract({
-          address: EightPepenFCContractAddress,
-          abi: EightPepenFCNFTABI,
-          functionName: 'imageSupply',
-        })
-        let tempImages:Image[]=[];
-        for( let i=1;i<=totalSupply;i++){ 
-          console.log("get URI:",i);
-          const imageJsonURI = await publicClient.readContract({
-            address: EightPepenFCContractAddress,
-            abi: EightPepenFCNFTABI,
-            functionName: 'imageURI',
-            args:[BigInt(i),BigInt(i)]
-          })
-          const imageDetails = await publicClient.readContract({
-            address: EightPepenFCContractAddress,
-            abi: EightPepenFCNFTABI,
-            functionName: 'images',
-            args:[BigInt(i)]
-          })
-          const votes  = await publicClient.readContract({
-            address: EightPepenFCContractAddress,
-            abi: EightPepenFCNFTABI,
-            functionName: 'votes',
-            args:[BigInt(i)]
-          })
-          const json = atob(imageJsonURI.substring(29));
-          const imageJson = JSON.parse(json);
-          imageJson.id = i;
-          imageJson.votes = votes;
-          imageJson.counts = imageDetails[3]; //counts
-          imageJson.revealed = imageDetails[2];//revealed
-          imageJson.setId = imageDetails[1];
-
-          tempImages.push(imageJson);
-        }
-        // setNFTs(tempNFTs);
-        resolve(tempImages);
+  const totalSupply = await publicClient.readContract({
+    address: EightPepenFCContractAddress,
+    abi: EightPepenFCNFTABI,
+    functionName: 'imageSupply',
+  })
+  let tempImages:Image[]=[];
+  let batchFns = []
+  for( let i=1;i<=totalSupply;i++){ 
+    batchFns.push(async () => {
+      
+      console.log("get URI:",i);
+      const imageJsonURI = await publicClient.readContract({
+        address: EightPepenFCContractAddress,
+        abi: EightPepenFCNFTABI,
+        functionName: 'imageURI',
+        args:[BigInt(i),BigInt(i)]
+      })
+      const imageDetails = await publicClient.readContract({
+        address: EightPepenFCContractAddress,
+        abi: EightPepenFCNFTABI,
+        functionName: 'images',
+        args:[BigInt(i)]
+      })
+      const votes  = await publicClient.readContract({
+        address: EightPepenFCContractAddress,
+        abi: EightPepenFCNFTABI,
+        functionName: 'votes',
+        args:[BigInt(i)]
+      })
+      const json = atob(imageJsonURI.substring(29));
+      const imageJson = JSON.parse(json);
+      let image:Image ={} as Image;
+      image.URI = imageJson;
+      image.id = i;
+      image.votes = votes;
+      image.counts = imageDetails[3]; //counts
+      image.revealed = imageDetails[2];//revealed
+      image.setId = Number(imageDetails[1]);
+      tempImages.push(image);
     })
-    return images;
+  }
+  await batch(batchFns,10,false);
+  return tempImages;
 }
 export const getUnrevealedImages = async():Promise<Image[]>=>{
     const images = new Promise<Image[]>(async(resolve,reject)=>{
@@ -213,4 +226,24 @@ export const getUnrevealedImages = async():Promise<Image[]>=>{
         resolve(tempImages);
     })
     return images;
+}
+export const getSetsWithDetails = async():Promise<SetDetails[]>=>{
+  const sets = await getSubmissionSets();
+  const images  = await getImages();
+  const groupedImages = groupBy<Image>(images,"setId");
+  console.log("Grouped Images:", groupedImages);
+  const setsWithDetails = sets.map(x=>{
+    (x as SetDetails).images = groupedImages[x.id]
+    return x as SetDetails
+  })
+  console.log(setsWithDetails);
+  //@ts-ignore
+  return setsWithDetails;
+}
+const groupBy = function<TItem>(xs: TItem[], key: string) : {[key: string]: TItem[]}{
+  return xs.reduce(function(rv, x) {
+    //@ts-ignore
+    (rv[x[key]] = rv[x[key]] || []).push(x);
+    return rv;
+  }, {});
 }
