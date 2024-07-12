@@ -11,6 +11,13 @@ export const metadata: Metadata = {
   description: "A fully onchain pixel NFT based on Opepen",
 };
 
+export const viewport: Viewport = {
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: 'no',
+  width: 'device-width'
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{

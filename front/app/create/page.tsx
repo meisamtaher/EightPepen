@@ -90,14 +90,14 @@ const EightPepenSetMint = () => {
   return (
     <div className='flex flex-col gap-4'>
       <div className='flex items-center'>
-        <div className='w-96 text-2xl'>Edition Type:</div>
+        <div className='w-72 text-xl'>Edition Type:</div>
         <select className='w-56 p-4 text-xs' value={editionType} onChange={e => updateEditionType(e.target.value)}>
           <option value='numbered'>Numbered Print</option>
           <option value='print'>Print Edition</option>
         </select>
       </div>
       <div className='flex items-center'>
-        <div className='w-96 text-2xl'>Renderer:</div>
+        <div className='w-72 text-xl'>Renderer:</div>
         <select className='w-56 p-4 text-xs' value={renderer} onChange={e => setRenderer(e.target.value)}>
           <option value='default'>Default</option>
           <option value='circular'>Circular</option>
@@ -137,7 +137,7 @@ const EightPepenSetMint = () => {
         </div>
       ))}
       <div className='my-16 border-t-4 border-black' />
-      <div className='mb-8 text-2xl'>
+      <div className='mb-8 text-xl'>
         Set Data
       </div>
       <div className='flex items-center'>

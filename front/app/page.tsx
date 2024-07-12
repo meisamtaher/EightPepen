@@ -19,7 +19,7 @@ const MainPage = () => {
   }
 
   return (
-    <div className='flex flex-wrap gap-8'>
+    <div className='flex flex-wrap gap-6'>
         {NFTs.map(nft=>(
             <Link key={nft.id} href={`/token/${nft.id}`}>
                 <div className='w-[150px] h-[250px] flex flex-col g-1'>

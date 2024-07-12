@@ -61,8 +61,8 @@ let Upload = forwardRef(({ bgColor, defaultFillColor, renderer, onChange, penCol
   }
 
   let startDrag = e => {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault?.()
+    e.stopPropagation?.()
     updateDrag({
       active: true,
       x: e.pageX - data.left,
@@ -264,7 +264,7 @@ let Upload = forwardRef(({ bgColor, defaultFillColor, renderer, onChange, penCol
               style={imgStyle}
               onLoad={handleLoad}
               onMouseDown={startDrag}
-              onTouchSart={handleTouchStart}
+              onTouchStart={handleTouchStart}
             />
             <div className='absolute opacity-70 pointer-events-none' style={{ ...imgStyle, background: bgColor }} />
             <div

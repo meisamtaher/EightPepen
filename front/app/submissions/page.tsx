@@ -41,10 +41,10 @@ const Submissions = () => {
   }
 
   return (
-    <div className='flex flex-wrap gap-12'>
+    <div className='flex flex-wrap gap-6'>
         {images.map(image =>(
           <div key={image.id} className='flex flex-col  justify-center'>
-            <div  className='flex flex-col w-[180px] h-[240px] gap-1 justify-self-center'>
+            <div  className='flex flex-col w-[150px] h-[240px] gap-1 justify-self-center'>
                 <img src={image.URI.image} width={150} height={150}></img>  
                 <a className='w-[150px] text-wrap text-xs'>name: {image.URI.name}</a>
                 <a className='w-[150px] text-wrap text-xs mt-2'>opt-ins: {image.votes}/{image.counts}</a>
