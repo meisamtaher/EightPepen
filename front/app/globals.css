@@ -11,3 +11,16 @@ body {
     text-wrap: balance;
   }
 }
+
+.hamburgerMenu {
+  transform-style: preserve-3d;
+  perspective: 100px;
+  transform-origin: 50% 0;
+  transform: rotateX(-90deg);
+  transition: transform 350ms ease, opacity 350ms ease, visibility 350ms ease;
+}
+.hamburgerMenuOpen {
+  transform: none;
+  opacity: 1;
+  visibility: visible;
+}
