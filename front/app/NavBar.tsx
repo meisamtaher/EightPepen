@@ -10,10 +10,10 @@ import { FaBars, FaX } from 'react-icons/fa6'
 
 const NavBar = () => {
   const [open, setOpen] = useState(false);
-  const ref = useRef();
+  const ref = useRef(null);
   useEffect(() => {
-    const handler = e => {
-      if (!ref.current.contains(e.target))
+    const handler = (e: any) => {
+      if (!(ref.current as any).contains(e.target))
         setOpen(false)
     }
     addEventListener('click', handler)
