@@ -15,26 +15,28 @@ describe("Lock", function () {
     PixelColors.push(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000n);
     const bgColor = 0x000000;
     //0 blue, 1 green , 2 red, 3 black, 4 white
-    // Contracts are deployed using the first signer/account by default
-    // const [owner, otherAccount] = await hre.viem.getWalletClients();
+    const name = "Original Renderer"
+    const EightPepenRendererFactory = await ethers.getContractFactory("EightPepenFCRenderer");
+    const EightPepenFCRenderer = await EightPepenRendererFactory.deploy(name)
 
-    const EightPepenFCRenderer = await ethers.deployContract("EightPepenFCRenderer");
-    const EightPepenFCNFT = await ethers.deployContract("EightPepenFCNFT");
-
-    // const publicClient = await hre.viem.getPublicClient();
 
     return {
       EightPepenFCRenderer,
       PixelColors,
-      bgColor
+      bgColor,
+      name
     };
   }
 
   describe("Deployment", function () {
-    it("Should Return SVG", async function () {
-      const { EightPepenFCRenderer, PixelColors, bgColor  } = await loadFixture(deployRandomNFTFixture);
-      const svg = await EightPepenFCRenderer.getSVG([PixelColors[0],PixelColors[1]],bgColor);
-      console.log("SVG :", svg);
+    it("name is set", async function () {
+      const { EightPepenFCRenderer, PixelColors, bgColor, name  } = await loadFixture(deployRandomNFTFixture);
+      expect(await EightPepenFCRenderer.name()).to.equal(name);
     });
+    it("should return SVG", async function(){
+      const { EightPepenFCRenderer, PixelColors, bgColor, name  } = await loadFixture(deployRandomNFTFixture);
+      const svg = await EightPepenFCRenderer.getSVG([PixelColors[0],PixelColors[1]],bgColor);
+      console.log("SVG data:",svg)
+    })
   });
 });
