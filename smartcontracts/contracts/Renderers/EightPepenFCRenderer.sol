@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import "./interfaces/IEightPepenFCRenderer.sol";
+import "../interfaces/IEightPepenFCRenderer.sol";
 import "hardhat/console.sol";
 contract EightPepenFCRenderer  {
     // using these two variables(pixels) to render our 8pepen svg
