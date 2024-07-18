@@ -1,10 +1,8 @@
 pragma solidity ^0.8.0;
 
-import "./interfaces/IEightPepenFCRenderer.sol";
+import "../interfaces/IEightPepenFCRenderer.sol";
 import "hardhat/console.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-
-contract EightPepenFCRendererCircular  {
+contract EightPepenFCRendererOpepen  {
     // using these two variables(pixels) to render our 8pepen svg
     function getSVG(uint256[2] calldata pixelColors1,uint24 bgColor1,uint256[2] calldata pixelColors2,uint24 bgColor2 ) public pure returns (string memory){
                        //        X
@@ -61,7 +59,7 @@ contract EightPepenFCRendererCircular  {
         //  in the pixels varialbe we have 64 pixels each needs 3 bit ...
         //  that shows the color index in the colors variable 
         string memory image = string(abi.encodePacked(
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges" width="512" height="512">',
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" shape-rendering="geometricPrecision" width="512" height="512">',
             '<rect width="100%" height="100%" fill="#',toHexString(bgColor,6) , '"/>'
             ));
         for(uint256 x=0; x<4; x++){ 
@@ -89,7 +87,21 @@ contract EightPepenFCRendererCircular  {
         return image;
     }
     function _getPixel(uint256 x, uint256 y , uint24 color) internal pure returns (string memory){
-        return string( abi.encodePacked('<circle r="1" cx="',Strings.toString(x+x+1), '" cy="', Strings.toString(y+y+1), '" fill="#',toHexString(color,6), '"/>'));
+        string memory pathStart = string(abi.encodePacked('<path d="m ', _uint2str(x), ' ', _uint2str(y), ' '));
+        string memory tl = ' m  1  1   l   -1  0   a 1 1 0 0 1    1 -1  z';
+        string memory tr = ' m  0  1   l    0 -1   a 1 1 0 0 1    1  1  z';
+        string memory bl = ' m  1  0   l    0  1   a 1 1 0 0 1   -1 -1  z';
+        string memory br = ' m  0  0   l    1  0   a 1 1 0 0 1   -1  1  z';
+        string memory end = string(abi.encodePacked('" fill="#', toHexString(color, 6), '"/>'));
+        if ((x == 4 && y == 2) || (x == 2 && y == 7))
+          return string(abi.encodePacked(pathStart, tl, end));
+        if ((x == 3 && y == 2) || (x == 5 && y == 2) || (x == 5 && y == 7))
+          return string(abi.encodePacked(pathStart, tr, end));
+        if ((x == 2 && y == 3) || (x == 4 && y == 3) || (x == 2 && y == 5))
+          return string(abi.encodePacked(pathStart, bl, end));
+        if ((x == 3 && y == 3) || (x == 5 && y == 3) || (x == 5 && y == 5))
+          return string(abi.encodePacked(pathStart, br, end));
+        return string(abi.encodePacked('<rect width="1" height="1" x="', _uint2str(x), '" y="', _uint2str(y), end));
     }
     // just for numbers from 0 to 8
     function _uint2str(uint _i)
