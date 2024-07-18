@@ -18,7 +18,7 @@ contract EightPepenFCRendererOpepen  is BaseRenderer, IEightPepenFCRenderer {
         //  in the pixels varialbe we have 64 pixels each needs 3 bit ...
         //  that shows the color index in the colors variable 
         string memory image = string(abi.encodePacked(
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" shape-rendering="crispEdges" width="512" height="512">',
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" shape-rendering="geometricPrecision" width="512" height="512">',
             '<rect width="100%" height="100%" fill="#',Strings.toHexString(bgColor1,6) , '"/>'
             '<rect width="4" height="8" x="4" y="0" fill="#',Strings.toHexString(bgColor2,6) , '"/>'
             ));
