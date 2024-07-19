@@ -201,6 +201,8 @@ contract EightPepenFCNFT is ERC721 {
                     sets[images[_imageId].setId].name,
                     '"},{"trait_type":"Revealed", "value": "',
                     images[_imageId].revealed?"True":"False",
+                    '"},{"trait_type":"Renderer", "value": "',
+                    IEightPepenFCRenderer(sets[images[_imageId].setId].renderer).name(),
                     '"},{"trait_type":"Edition Size", "value": "',
                     Strings.toString(images[_imageId].count),'"}'
                 )
