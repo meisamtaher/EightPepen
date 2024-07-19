@@ -5,7 +5,7 @@ import {BaseRenderer} from "./BaseRenderer.sol";
 import {Strings} from "../util/Strings.sol";
 
 
-contract EightPepenFCRenderer is BaseRenderer, IEightPepenFCRenderer {
+contract EightPepenFCRenderer is BaseRenderer {
     constructor(string memory _name) BaseRenderer(_name){}
     // using these two variables(pixels) to render our 8pepen svg
     function getSVG(uint256[2] calldata pixelColors1,uint24 bgColor1,uint256[2] calldata pixelColors2,uint24 bgColor2 ) public pure returns (string memory){
