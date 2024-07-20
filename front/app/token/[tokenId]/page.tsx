@@ -16,6 +16,7 @@ const TokenPage = ({ params }: { params: { tokenId: string } }) => {
   useEffect(() => {
     getTokenDetails(Number(params.tokenId)).then(x=>{
       setNft(x);
+      console.log("NFT:", x);
     })
 
   }, []);
@@ -23,12 +24,30 @@ const TokenPage = ({ params }: { params: { tokenId: string } }) => {
   return (
     <div>
         {nft && 
-          <div className='flex flex-row'>
+          <div className='flex flex-wrap'>
 
-            <div className='w-[150px] h-[250px] flex flex-col g-1'>
-                <img src={nft.raw.metadata.image} width={150} height={150}></img>  
-                <a className='w-[150px] text-wrap text-xs mt-2'>name: {nft!.name}</a>
-                
+            <div className='w-[300px] h-[300px] flex flex-col g-1'>
+                <img src={nft.raw.metadata.image} width={300} height={300}></img> 
+
+            </div>
+            <div className='flex flex-col gap-6 pt-8 pl-10'>
+              <div className='flex flex-col gap-1'>
+                <a className='text-xs'>SET </a>
+                <a className='text-xs'>{nft!.name}</a>
+              </div>
+              <div className='flex flex-col gap-1'>
+                <a className='text-xs'>DESCRIPTION </a>
+                <a className='text-xs'>{nft!.description}</a>
+              </div>
+              <a className=' text-wrap text-xs mt-2'></a>
+              <div className='flex flex-auto gap-8'>
+                {nft!.raw!.metadata!.attributes!.map((attribute: { trait_type: string , value: string },index:number)=>(
+                  <div key={index} className='flex flex-col gap-1'>
+                    <a className='text-xs'>{attribute.trait_type}</a>
+                    <a className='text-xs'>{attribute.value}</a>
+                  </div>
+                ))}
+              </div>
             </div>
             {loading && <Loader></Loader>}
             {!loading && <button  className="flex flex-row-reverse" onClick={()=>refresh()}>

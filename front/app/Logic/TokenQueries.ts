@@ -8,16 +8,14 @@ export interface NFT{
     id: number,
     name: string,
     description: string,
-    image: string
+    image: string,
+    owner: Address,
     attributes:[
     ]
 }
 export const getTokenDetails = async(id:number):Promise<Nft>=>{
-    const NFT = new Promise<Nft>(async(resolve,reject)=>{
-        const metadata = await alchemy.nft.getNftMetadata(EightPepenFCContractAddress,id);
-        resolve(metadata);
-    })
-    return NFT;
+  const metadata = await alchemy.nft.getNftMetadata(EightPepenFCContractAddress,id);
+  return metadata;
 }
 export const getTokens = async():Promise<NFT[]>=>{
     const nfts = new Promise<NFT[]>(async(resolve,reject)=>{
