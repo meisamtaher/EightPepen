@@ -7,11 +7,17 @@ import { alchemy } from "../Util/alchemy";
 import { batch } from "../Util/batch";
 import { Utils } from "alchemy-sdk";
 import { } from "wagmi";
-
+import setsJson from "./setsWithDetail.json";
+const MockSets:SetDetails[] = setsJson as unknown as SetDetails[];
+export const PAGE_SIZE = 10;
 export interface Set{
     id: number,
     name:string,
     description:string,
+    votes: number,
+    counts: number,
+    revealed: boolean,
+    setNumber: number,
     owner: Address,
 }
 export const getTotalSupply= async():Promise<number>=>{
@@ -77,7 +83,14 @@ export const getSubmissionSets = async():Promise<Set[]>=>{
                 functionName: 'sets',
                 args:[BigInt(i)]
               })
-              let temp:Set = {id:i,name:SetDetails[0],description:SetDetails[1],owner:'0x0'};
+              let temp:Set
+              if(i%5){
+                temp = {id:i,name:SetDetails[0],description:SetDetails[1],owner:'0x0123',counts:80,votes:0,revealed:false,setNumber:0};
+              }
+              else{
+                temp = {id:i,name:SetDetails[0],description:SetDetails[1],owner:'0x0123',counts:80,votes:80,revealed:true,setNumber:i/5+1};
+
+              }
               if(parsedLogs[i-1] && parsedLogs[i-1].args[0]== BigInt(i)){
                 temp.owner = parsedLogs[i-1].args[1];
               }
@@ -89,12 +102,16 @@ export const getSubmissionSets = async():Promise<Set[]>=>{
     })
     return sets;
 }
-interface SetDetails{
+export interface SetDetails{
     id: number,
-    name:string,
-    description:string,
-    owner:Address,
-    images:Image[]
+    name: string,
+    description: string,
+    owner: Address,
+    counts: number,
+    votes: number,
+    revealed:boolean
+    setNumber: number,
+    images: undefined|Image[]
 }
 export interface Image{
     id: number,
@@ -108,30 +125,31 @@ export interface Image{
         image: string
     }
 }
-export const getSetDetails = async(id:number):Promise<SetDetails>=>{
-  const EightPepenInterface = new Utils.Interface(EightPepenFCNFTABI);
-  const AddImageEvent = EightPepenInterface.encodeFilterTopics('AddImage', ["_setId"=id]);
-  console.log("FIlter: ", AddImageEvent)
-  const logs = await alchemy.core.getLogs({
-    fromBlock: '0x0',
-    toBlock: 'latest',
-    address: EightPepenFCContractAddress,
-    topics: AddImageEvent,
-  });
-  const parsedLogs = logs.map(log=> {
-    return EightPepenInterface.parseLog(log)
-  })
-  console.log("Logs:", parsedLogs);
-  // const logs = await publicClient.getLogs({  
+export const getSetDetails = async(id:number):Promise<SetDetails|undefined>=>{
+  return MockSets.find(set=>(set.id==id));
+  // const EightPepenInterface = new Utils.Interface(EightPepenFCNFTABI);
+  // const AddImageEvent = EightPepenInterface.encodeFilterTopics('AddImage', []);
+  // console.log("FIlter: ", AddImageEvent)
+  // const logs = await alchemy.core.getLogs({
+  //   fromBlock: '0x0',
+  //   toBlock: 'latest',
   //   address: EightPepenFCContractAddress,
-  //   event: parseAbiItem('event AddImage(uint256 indexed _id,uint256 indexed _setId, uint16, address artist)'),
-  //   args:{
-  //       _setId:BigInt(id)
-  //   }
+  //   topics: AddImageEvent,
+  // });
+  // const parsedLogs = logs.map(log=> {
+  //   return EightPepenInterface.parseLog(log)
   // })
-  console.log("Images:", parsedLogs);
-  let tempSets:SetDetails={} as SetDetails;
-  return tempSets;
+  // console.log("Logs:", parsedLogs);
+  // // const logs = await publicClient.getLogs({  
+  // //   address: EightPepenFCContractAddress,
+  // //   event: parseAbiItem('event AddImage(uint256 indexed _id,uint256 indexed _setId, uint16, address artist)'),
+  // //   args:{
+  // //       _setId:BigInt(id)
+  // //   }
+  // // })
+  // console.log("Images:", parsedLogs);
+  // let tempSets:SetDetails={} as SetDetails;
+  // return tempSets;
 }
 export const getImages = async():Promise<Image[]>=>{
   const totalSupply = await publicClient.readContract({
@@ -239,6 +257,18 @@ export const getSetsWithDetails = async():Promise<SetDetails[]>=>{
   console.log(setsWithDetails);
   //@ts-ignore
   return setsWithDetails;
+}
+export const getSetsPageWithDetails = async(page:number):Promise<SetDetails[]>=>{
+  let start = page*PAGE_SIZE;
+  let end = (page+1)*PAGE_SIZE
+  if(start>MockSets.length){
+    start = MockSets.length;
+  }
+  if(end>MockSets.length){
+    end = MockSets.length;
+  }
+  let setsWithDetails:SetDetails[] = MockSets.slice(start,end);
+  return setsWithDetails ;
 }
 const groupBy = function<TItem>(xs: TItem[], key: string) : {[key: string]: TItem[]}{
   return xs.reduce(function(rv, x) {

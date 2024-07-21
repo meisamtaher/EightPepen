@@ -2,13 +2,11 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import AddressViewer from "../Components/AddressViewer";
-import { getSetsWithDetails, Set } from "../Logic/ContractQueries";
+import { getSetsPageWithDetails, getSetsWithDetails, Set } from "../Logic/ContractQueries";
 import Link from "next/link";
 import Loader from '../Components/Loader'
-import { SetDetails } from "../Logic/SetQueries";
-import SetOverview from "../Components/SetOverview";
- 
-
+import { SetDetails } from "../Logic/ContractQueries";
+import SetOverview from "../Components/SetOverview"; 
 
 interface NFT{
   id: number,
@@ -22,8 +20,9 @@ export default function Home() {
   const [Sets,setSets] = useState<SetDetails[]>();
   const getNFTlist = async()=>{
     // getSubmissionSets()
-    const setsWithDetails = await getSetsWithDetails();
+    const setsWithDetails = await getSetsPageWithDetails(0);
     // const sets = await getSubmissionSets();
+    console.log("Sets With Details:", setsWithDetails);
     setSets(setsWithDetails)
     setLoading(false)
   }
@@ -42,14 +41,7 @@ export default function Home() {
           {
           Sets?.map(set=>
             (<Link  key={set.id} href={`/set/${set.id}`}>
-              <div className="flex flex-col h-40 w-80 bg-slate-300 gap-y-6 p-4">
-                <a className=" text-xs">{set.name}</a>
-                <a className=" text-xs">{set.description}</a>
-                <div className="grow flex items-end">
-                  <SetOverview set = {set}></SetOverview>
-                  <AddressViewer address={set.owner}></AddressViewer>
-                </div>
-              </div>
+              <SetOverview set = {set}></SetOverview>
             </Link>
           )
           )
