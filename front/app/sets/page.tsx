@@ -15,12 +15,15 @@ interface NFT{
   image:string,
   address:string
 }
+const totalPages = 100;
 export default function Home() {
-  const [loading, setLoading] = useState<boolean>(true);
+  const [page, setPage] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(false);
   const [Sets,setSets] = useState<SetDetails[]>();
   const getNFTlist = async()=>{
+    setLoading(true);
     // getSubmissionSets()
-    const setsWithDetails = await getSetsPageWithDetails(0);
+    const setsWithDetails = await getSetsPageWithDetails(page);
     // const sets = await getSubmissionSets();
     console.log("Sets With Details:", setsWithDetails);
     setSets(setsWithDetails)
@@ -28,7 +31,7 @@ export default function Home() {
   }
   useEffect(() => {
     getNFTlist();
-  }, []);
+  }, [page]);
 
   if (loading) {
     return <Loader />
@@ -36,6 +39,18 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col  gap-8">
+      <div className="flex items-center">
+        Page:
+        <input
+          type="number"
+          min={1}
+          max={totalPages}
+          value={page + 1}
+          onChange={e => setPage(e.target.value - 1)}
+          className="inline w-14 pl-2 py-1 mr-2"
+        />
+        /{totalPages}
+      </div>
       <div className="flex flex-wrap  gap-x-8 gap-y-12">
         
           {

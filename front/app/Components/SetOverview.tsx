@@ -1,21 +1,35 @@
 import React from 'react'
+import { RiVerifiedBadgeFill } from 'react-icons/ri'
 import { SetDetails } from '../Logic/ContractQueries'
-import AddressViewer from './AddressViewer'
 
-const SetOverview = (props:{set:SetDetails}) => {
+const SetOverview = ({set}: {set: SetDetails}) => {
   return (
-    <div className="flex flex-col h-80 w-80 bg-slate-300 gap-y-6 p-4">
-      <div className='flex flex-auto max-w-80 max-h-80'>
-          {props.set.images && <img className='h-48 w-48' src = {props.set.images[0].URI.image}></img>}
-
-          {props.set.images && props.set.images!.map((image,index)=>(
-              index!=0 &&
-              <img className=' min-h-20 min-w-20' src = {image.URI.image} width={20} height={20}></img>
-          ))}
+    <div className="flex flex-col w-72 h-96 gap-y-4">
+      <div className='w-72 h-72 mb-2'>
+        {set.images?.length > 1 ? (
+          <div className='grid grid-cols-3 grid-rows-3'>
+            {set.images.map((image, i) => (
+              <img key={i} className={i === 0 ? 'col-span-2 row-span-2' : ''} src={image.URI.image} />
+            ))}
+          </div>
+        ) : set.images && (
+          <img src={set.images[0].URI.image} />
+        )}
       </div>
-      <a className=" text-xs">{props.set.name}</a>
-      <div className="grow flex items-end">
-        <AddressViewer address={props.set.owner}></AddressViewer>
+      <div className='flex justify-between gap-4 text-xs'>
+        <div className='flex gap-2'>
+          {set.images?.length > 1 ? 'Print Edition' : 'Numbered Print'}
+          {set.revealed && (
+            <div className='text-blue-700 mt-[-3px]'>
+              <RiVerifiedBadgeFill size={20} />
+            </div>
+          )}
+        </div>
+        <div>{set.votes}/{set.counts}</div>
+      </div>
+      <div className='flex justify-between gap-4 text-xs text-slate-500'>
+        <div>8x8</div>
+        <div className='truncate'>{set.name}</div>
       </div>
     </div>  
   )
