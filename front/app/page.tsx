@@ -22,9 +22,14 @@ const MainPage = () => {
     <div className='flex flex-wrap gap-6'>
         {NFTs.map(nft=>(
             <Link key={nft.id} href={`/token/${nft.id}`}>
-                <div className='w-[150px] h-[250px] flex flex-col g-1'>
+                <div className='w-[150px] h-[250px] flex flex-col gap-2'>
                     <img src={nft.image} width={150} height={150}></img>  
-                    <a className='w-[150px] text-wrap text-xs mt-2'>name: {nft.name}</a>
+                    <div className='flex flex-row'>
+                        <a className='w-[150px] text-wrap text-xs'>8✖️8</a>
+                        <div className='flex flex-1 flex-row-reverse'>
+                            <a className=' text-wrap text-xs '>#{nft.id}</a>
+                        </div>
+                    </div>
                 </div>
             </Link>
             
