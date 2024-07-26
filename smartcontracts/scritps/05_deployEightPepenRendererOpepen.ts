@@ -3,12 +3,12 @@ import { ethers } from "hardhat";
 async function main() {
     const [owner] = await ethers.getSigners();
     // 8Pepen Renderer  Opepen deployed at address:  0x5FbDB2315678afecb367f032d93F642f64180aa3
-
+    const name = "Opepen Renderer"
     const RendererContractFactory = await ethers.getContractFactory("EightPepenFCRendererOpepen");
-    const renderer = await RendererContractFactory.deploy();
+    const renderer = await RendererContractFactory.deploy(name);
     await renderer.waitForDeployment();
     const rendererAddress = await renderer.getAddress();
-    console.log(" 8Pepen Renderer  Opepen deployed at address: ", rendererAddress);
+    console.log(" OPepen Renderer  Opepen deployed at address: ", rendererAddress);
 }
 
 main()
