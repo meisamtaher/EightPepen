@@ -29,7 +29,7 @@ export const config = createConfig({
   chains: [baseSepolia],
   connectors: [
     coinbaseWallet({
-      appName: 'Create Wagmi',
+      appName: '8 Pepen',
       preference: 'smartWalletOnly',
     }),
   ],
