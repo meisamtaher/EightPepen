@@ -31,6 +31,14 @@ export const getTotalSupply= async():Promise<number>=>{
   })
   return totalSupply;
 }
+export const getTotalSets= async():Promise<number>=>{
+  const totalSets = await publicClient.readContract({
+    address: EightPepenFCContractAddress,
+    abi: EightPepenFCNFTABI,
+    functionName: 'setSupply',
+  })
+  return Number(totalSets);
+}
 export const getMaxSupply= async():Promise<number>=>{
   const maxSupply = new Promise<number>(async(resolve,reject)=>{
     const maxSupply = await publicClient.readContract({
@@ -54,53 +62,41 @@ export const getMintPrice= async():Promise<number>=>{
   return mintPrice;
 }
 export const getSubmissionSets = async():Promise<Set[]>=>{
-    const sets = new Promise<Set[]>(async(resolve,reject)=>{
-          const totalSets = await publicClient.readContract({
-              address: EightPepenFCContractAddress,
-              abi: EightPepenFCNFTABI,
-              functionName: 'setSupply',
-            })
-          const EightPepenInterface = new Utils.Interface(EightPepenFCNFTABI);
-          const AddSetEvent = EightPepenInterface.encodeFilterTopics('AddSet', []);
-          console.log("FIlter: ", AddSetEvent)
-          const logs = await alchemy.core.getLogs({
-            fromBlock: '0x0',
-            toBlock: 'latest',
-            address: EightPepenFCContractAddress,
-            topics: AddSetEvent,
-          });
-          const parsedLogs = logs.map(log=> {
-            return EightPepenInterface.parseLog(log)
-          })
-          let tempSets:Set[]=[];
-          let batchFns = []
-          for( let i=1;i<=totalSets;i++){ 
-            batchFns.push(async () => {
-              console.log("get URI:",i);
-              const SetDetails = await publicClient.readContract({
-                address: EightPepenFCContractAddress,
-                abi: EightPepenFCNFTABI,
-                functionName: 'sets',
-                args:[BigInt(i)]
-              })
-              let temp:Set
-              if(i%5){
-                temp = {id:i,name:SetDetails[0],description:SetDetails[1],owner:'0x0123',counts:80,votes:0,revealed:false,setNumber:0};
-              }
-              else{
-                temp = {id:i,name:SetDetails[0],description:SetDetails[1],owner:'0x0123',counts:80,votes:80,revealed:true,setNumber:i/5+1};
-
-              }
-              if(parsedLogs[i-1] && parsedLogs[i-1].args[0]== BigInt(i)){
-                temp.owner = parsedLogs[i-1].args[1];
-              }
-              tempSets.push(temp);
-            })
-          }
-          await batch(batchFns)
-        resolve(tempSets);
+  const totalSets = await publicClient.readContract({
+      address: EightPepenFCContractAddress,
+      abi: EightPepenFCNFTABI,
+      functionName: 'setSupply',
     })
-    return sets;
+  let tempSets:Set[]=[];
+  let batchFns = []
+  for( let i=2;i<=totalSets;i++){ 
+    batchFns.push(async () => {
+      console.log("get URI:",i);
+      const SetDetails = await publicClient.readContract({
+        address: EightPepenFCContractAddress,
+        abi: EightPepenFCNFTABI,
+        functionName: 'sets',
+        args:[BigInt(i)]
+      })
+      const votes = await publicClient.readContract({
+        address: EightPepenFCContractAddress,
+        abi: EightPepenFCNFTABI,
+        functionName: 'getVotes',
+        args:[BigInt(i)]
+      })
+      const counts = await publicClient.readContract({
+        address: EightPepenFCContractAddress,
+        abi: EightPepenFCNFTABI,
+        functionName: 'getCounts',
+        args:[BigInt(i)]
+      })
+      let temp:Set
+      temp = {id:i,name:SetDetails[0],description:SetDetails[1],owner:SetDetails[4],counts:counts,votes:votes,revealed:SetDetails[5],setNumber:SetDetails[6]};
+      tempSets.push(temp);
+    })
+  }
+  await batch(batchFns)
+  return tempSets;
 }
 export interface SetDetails{
     id: number,
@@ -126,30 +122,50 @@ export interface Image{
     }
 }
 export const getSetDetails = async(id:number):Promise<SetDetails|undefined>=>{
-  return MockSets.find(set=>(set.id==id));
-  // const EightPepenInterface = new Utils.Interface(EightPepenFCNFTABI);
-  // const AddImageEvent = EightPepenInterface.encodeFilterTopics('AddImage', []);
-  // console.log("FIlter: ", AddImageEvent)
-  // const logs = await alchemy.core.getLogs({
-  //   fromBlock: '0x0',
-  //   toBlock: 'latest',
-  //   address: EightPepenFCContractAddress,
-  //   topics: AddImageEvent,
-  // });
-  // const parsedLogs = logs.map(log=> {
-  //   return EightPepenInterface.parseLog(log)
-  // })
-  // console.log("Logs:", parsedLogs);
-  // // const logs = await publicClient.getLogs({  
-  // //   address: EightPepenFCContractAddress,
-  // //   event: parseAbiItem('event AddImage(uint256 indexed _id,uint256 indexed _setId, uint16, address artist)'),
-  // //   args:{
-  // //       _setId:BigInt(id)
-  // //   }
-  // // })
-  // console.log("Images:", parsedLogs);
-  // let tempSets:SetDetails={} as SetDetails;
-  // return tempSets;
+  const SetDetails = await publicClient.readContract({
+    address: EightPepenFCContractAddress,
+    abi: EightPepenFCNFTABI,
+    functionName: 'sets',
+    args:[BigInt(id)]
+  })
+  const votes = await publicClient.readContract({
+    address: EightPepenFCContractAddress,
+    abi: EightPepenFCNFTABI,
+    functionName: 'getVotes',
+    args:[BigInt(id)]
+  })
+  const counts = await publicClient.readContract({
+    address: EightPepenFCContractAddress,
+    abi: EightPepenFCNFTABI,
+    functionName: 'getCounts',
+    args:[BigInt(id)]
+  })
+  let temp:Set
+  temp = {id:id,name:SetDetails[0],description:SetDetails[1],owner:SetDetails[4],counts:counts,votes:votes,revealed:SetDetails[5],setNumber:SetDetails[6]};
+  const EightPepenInterface = new Utils.Interface(EightPepenFCNFTABI);
+  const AddSetEvent = EightPepenInterface.encodeFilterTopics('ImageAdded', []);
+  const logs = await alchemy.core.getLogs({
+    fromBlock: '0x0',
+    toBlock: 'latest',
+    address: EightPepenFCContractAddress,
+    topics: AddSetEvent,
+  });
+  const parsedLogs = logs.map(log=> {
+    const logArgs = EightPepenInterface.parseLog(log).args;
+    return {id:logArgs._id,setId:logArgs._setId};
+  })
+  const groupedImageIds = groupBy<{id:number,setId:number}>(parsedLogs,"setId");
+  let imageIds:{id:number,setId:number}[]=[];
+  if(groupedImageIds[id]){
+    groupedImageIds[id].forEach(element => {
+      imageIds.push(element);
+    });
+  }
+  const images = await getImageURIs(imageIds);
+  const groupedImages = groupBy<Image>(images,"setId");
+  let setWithDetail = (temp as SetDetails);
+  setWithDetail.images = groupedImages[id];
+  return setWithDetail;
 }
 export const getImages = async():Promise<Image[]>=>{
   const totalSupply = await publicClient.readContract({
@@ -190,6 +206,30 @@ export const getImages = async():Promise<Image[]>=>{
       image.counts = imageDetails[3]; //counts
       image.revealed = imageDetails[2];//revealed
       image.setId = Number(imageDetails[1]);
+      tempImages.push(image);
+    })
+  }
+  await batch(batchFns,10,false);
+  return tempImages;
+}
+export const getImageURIs = async(imageIds:{id:number,setId:number}[]):Promise<Image[]>=>{
+  let tempImages:Image[]=[];
+  let batchFns = []
+  for( let i=0;i<=imageIds.length;i++){ 
+    batchFns.push(async () => {
+      console.log("get URI:",i);
+      const imageJsonURI = await publicClient.readContract({
+        address: EightPepenFCContractAddress,
+        abi: EightPepenFCNFTABI,
+        functionName: 'imageURI',
+        args:[BigInt(imageIds[i].id)]
+      })
+      const json = atob(imageJsonURI.substring(29));
+      const imageJson = JSON.parse(json);
+      let image:Image ={} as Image;
+      image.URI = imageJson;
+      image.id = i;
+      image.setId = imageIds[i].setId
       tempImages.push(image);
     })
   }
@@ -259,16 +299,35 @@ export const getSetsWithDetails = async():Promise<SetDetails[]>=>{
   return setsWithDetails;
 }
 export const getSetsPageWithDetails = async(page:number):Promise<SetDetails[]>=>{
-  let start = page*PAGE_SIZE;
-  let end = (page+1)*PAGE_SIZE
-  if(start>MockSets.length){
-    start = MockSets.length;
+  const sets = await getSubmissionSets();
+  const EightPepenInterface = new Utils.Interface(EightPepenFCNFTABI);
+  const AddSetEvent = EightPepenInterface.encodeFilterTopics('ImageAdded', []);
+  const logs = await alchemy.core.getLogs({
+    fromBlock: '0x0',
+    toBlock: 'latest',
+    address: EightPepenFCContractAddress,
+    topics: AddSetEvent,
+  });
+  const parsedLogs = logs.map(log=> {
+    const logArgs = EightPepenInterface.parseLog(log).args;
+    return {id:logArgs._id,setId:logArgs._setId};
+  })
+  const groupedImageIds = groupBy<{id:number,setId:number}>(parsedLogs,"setId");
+  let imageIds:{id:number,setId:number}[]=[];
+  for(let i =0; i<sets.length; i++){
+    if(groupedImageIds[sets[i].id]){
+      groupedImageIds[sets[i].id].forEach(element => {
+        imageIds.push(element);
+      });
+    }
   }
-  if(end>MockSets.length){
-    end = MockSets.length;
-  }
-  let setsWithDetails:SetDetails[] = MockSets.slice(start,end);
-  return setsWithDetails ;
+  const images = await getImageURIs(imageIds);
+  const groupedImages = groupBy<Image>(images,"setId");
+  const setsWithDetails = sets.map(x=>{
+    (x as SetDetails).images = groupedImages[x.id]
+    return x as SetDetails
+  })
+  return setsWithDetails;
 }
 const groupBy = function<TItem>(xs: TItem[], key: string) : {[key: string]: TItem[]}{
   return xs.reduce(function(rv, x) {
