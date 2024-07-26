@@ -118,56 +118,6 @@ export const EightPepenFCNFTABI = [
     "inputs": [
       {
         "indexed": true,
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "_setId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint16",
-        "name": "count",
-        "type": "uint16"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "artist",
-        "type": "address"
-      }
-    ],
-    "name": "AddImage",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "artist",
-        "type": "address"
-      }
-    ],
-    "name": "AddSet",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
         "internalType": "address",
         "name": "owner",
         "type": "address"
@@ -219,17 +169,48 @@ export const EightPepenFCNFTABI = [
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "_tokenId",
+        "name": "_id",
         "type": "uint256"
       },
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "_imageId",
+        "name": "firstToken",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "secondToken",
         "type": "uint256"
       }
     ],
-    "name": "Opt_In",
+    "name": "CollabAccepted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "firstToken",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "secondToken",
+        "type": "uint256"
+      }
+    ],
+    "name": "CollabRequested",
     "type": "event"
   },
   {
@@ -260,7 +241,76 @@ export const EightPepenFCNFTABI = [
         "type": "address"
       }
     ],
-    "name": "Published",
+    "name": "ImageAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_setId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint16",
+        "name": "count",
+        "type": "uint16"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "artist",
+        "type": "address"
+      }
+    ],
+    "name": "SetPublished",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_id",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "artist",
+        "type": "address"
+      }
+    ],
+    "name": "SetSubmitted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "_imageId",
+        "type": "uint256"
+      }
+    ],
+    "name": "TokenOptedIn",
     "type": "event"
   },
   {
@@ -316,22 +366,12 @@ export const EightPepenFCNFTABI = [
             "type": "uint24"
           },
           {
-            "internalType": "uint64",
-            "name": "setId",
-            "type": "uint64"
-          },
-          {
-            "internalType": "bool",
-            "name": "revealed",
-            "type": "bool"
-          },
-          {
             "internalType": "uint16",
             "name": "count",
             "type": "uint16"
           }
         ],
-        "internalType": "struct EightPepenFCNFT.EightPepenFCData[]",
+        "internalType": "struct EightPepenFCNFT.ImageData[]",
         "name": "_nftDatas",
         "type": "tuple[]"
       },
@@ -356,9 +396,14 @@ export const EightPepenFCNFTABI = [
             "internalType": "bool",
             "name": "hasRenderer",
             "type": "bool"
+          },
+          {
+            "internalType": "address",
+            "name": "artist",
+            "type": "address"
           }
         ],
-        "internalType": "struct EightPepenFCNFT.Set",
+        "internalType": "struct EightPepenFCNFT.SetData",
         "name": "_setData",
         "type": "tuple"
       }
@@ -474,6 +519,44 @@ export const EightPepenFCNFTABI = [
         "internalType": "address",
         "name": "",
         "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_setId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getCounts",
+    "outputs": [
+      {
+        "internalType": "uint16",
+        "name": "setCounts",
+        "type": "uint16"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_setId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getVotes",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "setVotes",
+        "type": "uint32"
       }
     ],
     "stateMutability": "view",
@@ -810,6 +893,16 @@ export const EightPepenFCNFTABI = [
         "internalType": "bool",
         "name": "hasRenderer",
         "type": "bool"
+      },
+      {
+        "internalType": "address",
+        "name": "artist",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "revealed",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -830,22 +923,12 @@ export const EightPepenFCNFTABI = [
             "type": "uint24"
           },
           {
-            "internalType": "uint64",
-            "name": "setId",
-            "type": "uint64"
-          },
-          {
-            "internalType": "bool",
-            "name": "revealed",
-            "type": "bool"
-          },
-          {
             "internalType": "uint16",
             "name": "count",
             "type": "uint16"
           }
         ],
-        "internalType": "struct EightPepenFCNFT.EightPepenFCData[]",
+        "internalType": "struct EightPepenFCNFT.ImageData[]",
         "name": "nftDatas",
         "type": "tuple[]"
       },
@@ -870,9 +953,14 @@ export const EightPepenFCNFTABI = [
             "internalType": "bool",
             "name": "hasRenderer",
             "type": "bool"
+          },
+          {
+            "internalType": "address",
+            "name": "artist",
+            "type": "address"
           }
         ],
-        "internalType": "struct EightPepenFCNFT.Set",
+        "internalType": "struct EightPepenFCNFT.SetData",
         "name": "setData",
         "type": "tuple"
       }

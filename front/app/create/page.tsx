@@ -4,7 +4,7 @@ import React, { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { EightPepenFCRenderer, EightPepenFCContractAddress, EightPepenFCCircularRenderer, EightPepenFCOpepenRenderer } from '../Constants/Contracts'
 import { EightPepenFCNFTABI } from "../ABIs/EightPepenFCNFTABI"
-import { useWriteContract } from 'wagmi'
+import { useAccount, useWriteContract } from 'wagmi'
 import { parseEther } from 'viem'
 import ColorPicker from '../Components/ColorPicker'
 import UploadImage from '../Components/UploadImage'
@@ -17,6 +17,7 @@ const copyCountArray = [1, 4, 5, 10, 20, 40]
 
 const EightPepenSetMint = () => {
   const router = useRouter()
+  const account = useAccount();
   const [loading, setLoading] = useState<boolean>(false)
   const [renderer, setRenderer] = useState<string>('default')
   const [editionType, setEditionType] = useState<string>('numbered')
@@ -45,15 +46,14 @@ const EightPepenSetMint = () => {
           return {
             pixelColors: [firsthalf, secondhalf],
             bgColor: bigIntBgColor,
-            setId: BigInt(0),
-            revealed: false,
             count: editionType === 'numbered' ? 1 : copyCountArray[i]
           }
         }), {
           name: setName,
           description,
           renderer: renderer === 'circular' ? EightPepenFCCircularRenderer :renderer === 'cool'? EightPepenFCOpepenRenderer: EightPepenFCRenderer,
-          hasRenderer: renderer !== 'default'
+          hasRenderer: renderer !== 'default',
+          artist: account.address
         }
       ]
     })

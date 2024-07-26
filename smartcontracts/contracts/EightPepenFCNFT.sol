@@ -19,8 +19,23 @@ contract EightPepenFCNFT is ERC721 {
         string description;
         IEightPepenFCRenderer renderer;
         bool hasRenderer;
+        address artist;
+        uint256[] images;
+        bool revealed;
     }
-    struct EightPepenFCData{
+    struct SetData{
+        string name;
+        string description;
+        IEightPepenFCRenderer renderer;
+        bool hasRenderer;
+        address artist;
+    }
+    struct ImageData{
+        uint256[2] pixelColors;
+        uint24 bgColor;
+        uint16 count;
+    }
+    struct Image{
         uint256[2] pixelColors;
         uint24 bgColor;
         uint64 setId;
@@ -33,57 +48,66 @@ contract EightPepenFCNFT is ERC721 {
     }
     mapping(uint256 => Set) public sets;
     mapping(uint256 => uint32) public votes;
-    mapping(uint256 => EightPepenFCData) public images;
+    mapping(uint256 => Image) public images;
     mapping(uint256 => TokenData) public tokens;
     mapping(uint256 => TokenData) public collabReq;
 
-    event AddImage(uint256 indexed _id, uint256 indexed _setId, uint16 count,address artist);
-    event AddSet (uint256 indexed _id, address artist);
-    event Opt_In(uint256 indexed _tokenId, uint256 indexed _imageId);
-    event Published(uint256 indexed _id, uint256 indexed _setId, uint16 count,address artist);
-    event CollabReq(uint256 indexed _id, uint256 indexed firstToken, uint256 indexed secondToken);
-    event CollabAccept(uint256 indexed _id, uint256 indexed firstToken, uint256 indexed secondToken);
-    constructor(IEightPepenFCRenderer _renderer)ERC721("Eight Pepen Full Color", "8PEPEN"){
+    event ImageAdded (uint256 indexed _id, uint256 indexed _setId, uint16 count,address artist);
+    event SetSubmitted (uint256 indexed _id, address artist);
+    event TokenOptedIn (uint256 indexed _tokenId, uint256 indexed _imageId);
+    event SetPublished (uint256 indexed _id, uint256 indexed _setId, uint16 count,address artist);
+    event CollabRequested (uint256 indexed _id, uint256 indexed firstToken, uint256 indexed secondToken);
+    event CollabAccepted (uint256 indexed _id, uint256 indexed firstToken, uint256 indexed secondToken);
+    constructor(IEightPepenFCRenderer _renderer)ERC721("Eight Pepen Full Color", "8 PEPEN"){
         renderer = _renderer;
-        EightPepenFCData memory firstImage;
+        ImageData memory firstImage;
         firstImage.pixelColors[0]= 0xffffffffffffffffffffffffffff000000ffffffffffffffffffffffffffffff;
         firstImage.pixelColors[1]= 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000;
         firstImage.bgColor= 0x000000;
         firstImage.count= maxSupply+1;
-        Set memory  firstSet;
-        firstSet.name = "not revealed";
-        firstSet.description = "This token can opt-in to each NFT ";
+        SetData memory  firstSet;
+        firstSet.name = "-";
+        firstSet.description = "-";
         firstSet.hasRenderer = false;
         firstSet.renderer = _renderer;
         addSet(firstImage,firstSet);
     }
-    function submitSet(EightPepenFCData[] calldata nftDatas,Set calldata setData) public{
+    function submitSet(ImageData[] calldata nftDatas,SetData calldata setData) public{
         require(!setData.hasRenderer || address(setData.renderer)!= address(0),"Bad renderer config");
-        // check if renderer is correct !!!!!
+        // check if renderer is has correct Interface!!!!!
         addSet(nftDatas,setData);
     }
-    function addImage(EightPepenFCData memory _image,uint64 _setId) internal {
+    function addImage(ImageData memory _image,uint64 _setId, address _artist) internal {
         imageSupply++;
         images[imageSupply].pixelColors = _image.pixelColors;
         images[imageSupply].bgColor = _image.bgColor;
         images[imageSupply].count = _image.count;
         images[imageSupply].setId = _setId;
-        images[imageSupply].revealed= false;
-        emit AddImage(imageSupply,_setId,_image.count,msg.sender);
+        emit ImageAdded (imageSupply, _setId, _image.count, _artist);
     }
-    function addSet(EightPepenFCData memory _nftData,Set memory _setData) internal {
+    function addSet(ImageData memory _nftData,SetData memory _setData) internal {
         setSupply++;
-        sets[setSupply] = _setData;
-        addImage(_nftData, setSupply);
-        emit AddSet(setSupply,msg.sender);
+        sets[setSupply].name = _setData.name;
+        sets[setSupply].description = _setData.description;
+        sets[setSupply].renderer = _setData.renderer;
+        sets[setSupply].hasRenderer = _setData.hasRenderer;
+        sets[setSupply].artist = _setData.artist;
+        addImage(_nftData, setSupply, _setData.artist);
+        sets[setSupply].images.push(imageSupply);
+        emit SetSubmitted(setSupply, _setData.artist);
     }
-    function addSet(EightPepenFCData[] memory _nftDatas,Set memory _setData) public {
+    function addSet(ImageData[] memory _nftDatas,SetData memory _setData) public {
         setSupply++;
-        sets[setSupply] = _setData;
+        sets[setSupply].name = _setData.name;
+        sets[setSupply].description = _setData.description;
+        sets[setSupply].renderer = _setData.renderer;
+        sets[setSupply].hasRenderer = _setData.hasRenderer;
+        sets[setSupply].artist = _setData.artist;
         for(uint i=0;i<_nftDatas.length;i++){
-            addImage(_nftDatas[i], setSupply);
+            addImage(_nftDatas[i], setSupply, _setData.artist);
+            sets[setSupply].images.push(imageSupply);
         }
-        emit AddSet(setSupply,msg.sender);
+        emit SetSubmitted(setSupply,_setData.artist);
     }
     function mint() public payable {
         // Require token ID to be between 1 and maxSupply (111)
@@ -104,7 +128,7 @@ contract EightPepenFCNFT is ERC721 {
         require(!images[tokens[_tokenId].imageId].revealed,"you can't opt-in with a revealed token");
         /// if user is changing opt-in we should change votes for latest image
         unsafe_opt_in(_imageId,_tokenId);
-        emit Opt_In(_tokenId,_imageId);
+        emit TokenOptedIn(_tokenId,_imageId);
     }
     function collab_req(uint256 _ownedToken,uint256 _secondToken)public {
         require(_ownedToken>0 && _ownedToken<=totalSupply,"token not found");
@@ -115,7 +139,7 @@ contract EightPepenFCNFT is ERC721 {
         collabReqCount++;
         collabReq[collabReqCount].imageId = _ownedToken;
         collabReq[collabReqCount].secondId = _secondToken;
-        emit CollabReq(collabReqCount,_ownedToken,_secondToken);
+        emit CollabRequested (collabReqCount,_ownedToken,_secondToken);
     }
     function accept_req(uint256 _collabReqId)public{
         //check collab_req exist 
@@ -125,7 +149,7 @@ contract EightPepenFCNFT is ERC721 {
         require(ownerOf(collab.secondId)== msg.sender,"you are not the owner of token");
         tokens[collab.imageId].secondId = tokens[collab.secondId].imageId;
         tokens[collab.secondId].secondId = tokens[collab.imageId].imageId;
-        emit CollabAccept(_collabReqId,collab.imageId,collab.secondId);
+        emit CollabAccepted(_collabReqId,collab.imageId,collab.secondId);
 
     }
     function unsafe_opt_in(uint256 _imageId,uint256 _tokenId) internal {
@@ -133,12 +157,16 @@ contract EightPepenFCNFT is ERC721 {
         votes[_imageId] ++;
         if(votes[_imageId]==images[_imageId].count){
             images[_imageId].revealed = true;
-            emit Published(_imageId,images[_imageId].setId,images[_imageId].count,msg.sender);
+            if(isSetfullyOpt_int(images[_imageId].setId)){
+                sets[images[_imageId].setId].revealed = true;
+                emit SetPublished (_imageId,images[_imageId].setId,images[_imageId].count,msg.sender);
+            }
         }
     }
+    //////////////////////////////// URI getters ///////////////////
     function tokenURI(uint tokenId)public view override returns (string memory){
         require(tokenId>0 && tokenId<=totalSupply,"Invalid tokenId");
-        uint256 imageId = images[tokens[tokenId].imageId].revealed?tokens[tokenId].imageId:1;
+        uint256 imageId = sets[images[tokens[tokenId].imageId].setId].revealed?tokens[tokenId].imageId:1;
         return tokens[tokenId].secondId ==0? imageURI(imageId,tokenId) : imageURI(imageId,tokens[tokenId].secondId,tokenId);
     }
     function imageURI(uint _imageId1,uint _imageId2, uint _tokenId)public view returns(string memory){
@@ -168,7 +196,7 @@ contract EightPepenFCNFT is ERC721 {
                 )
             );
     }
-    function imageURI(uint _imageId,uint _tokenId)public view returns (string memory){
+    function imageURI(uint _imageId)public view returns (string memory){
         require(_imageId>0 && _imageId<=imageSupply,"Invalid imageId");
         IEightPepenFCRenderer customRenderer = (_imageId!=0 && sets[images[_imageId].setId].hasRenderer)?sets[images[_imageId].setId].renderer:renderer;
         return
@@ -178,9 +206,10 @@ contract EightPepenFCNFT is ERC721 {
                     Base64.encode(
                         bytes(
                             abi.encodePacked(
-                                '{"name": "Eight Pepen #',
-                                Strings.toString(_tokenId),
-                                '", "description": "Eight Pepen is a collection of 888 fully on-chain, randomly generated'
+                                '{"name": "',
+                                sets[images[_imageId].setId].name,
+                                '", "description": "',
+                                sets[images[_imageId].setId].description,
                                 '", "image":"data:image/svg+xml;base64,',
                                 Base64.encode(bytes(customRenderer.getSVG(images[_imageId].pixelColors,images[_imageId].bgColor))),
                                 // '", "attributes": ""',
@@ -207,5 +236,29 @@ contract EightPepenFCNFT is ERC721 {
                     Strings.toString(images[_imageId].count),'"}'
                 )
         );
+    }
+    /////////////////////// Getter Functions //////////////////
+    function getVotes(uint256 _setId) public view returns(uint32 setVotes){
+        require(_setId>0 && _setId<=setSupply,"Invalid setId");
+        for(uint i=0;i<sets[_setId].images.length;i++){
+            setVotes += votes[sets[_setId].images[i]];  
+        }
+        return setVotes;
+    }
+    function isSetfullyOpt_int(uint256 _setId) private view returns(bool result){
+        require(_setId>0 && _setId<=setSupply,"Invalid setId");
+        for(uint i=0;i<sets[_setId].images.length;i++){
+            if(!images[sets[_setId].images[i]].revealed){
+                return false;
+            }
+        }
+        return true;
+    }
+    function getCounts(uint256 _setId) public view returns(uint16 setCounts){
+        require(_setId>0 && _setId<=setSupply,"Invalid setId");
+        for(uint i=0;i<sets[_setId].images.length;i++){
+            setCounts += images[sets[_setId].images[i]].count;  
+        }
+        return setCounts;
     }
 }
