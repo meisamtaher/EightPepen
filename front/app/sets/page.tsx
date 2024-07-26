@@ -17,13 +17,13 @@ interface NFT{
 }
 const totalPages = 100;
 export default function Home() {
-  const [page, setPage] = useState<number>(0);
+  const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
   const [Sets,setSets] = useState<SetDetails[]>();
   const getNFTlist = async()=>{
     setLoading(true);
     // getSubmissionSets()
-    const setsWithDetails = await getSetsPageWithDetails(page);
+    const setsWithDetails = await getSetsPageWithDetails(page-1);
     // const sets = await getSubmissionSets();
     console.log("Sets With Details:", setsWithDetails);
     setSets(setsWithDetails)
@@ -45,8 +45,8 @@ export default function Home() {
           type="number"
           min={1}
           max={totalPages}
-          value={page + 1}
-          onChange={e => setPage(e.target.value - 1)}
+          value={page}
+          onChange={e => setPage(Number(e.target.value))}
           className="inline w-14 pl-2 py-1 mr-2"
         />
         /{totalPages}
