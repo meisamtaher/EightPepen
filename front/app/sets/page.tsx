@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import AddressViewer from "../Components/AddressViewer";
-import { getSetsPageWithDetails, getSetsWithDetails, Set } from "../Logic/ContractQueries";
+import { getSetsPageWithDetails, getSetsWithDetails, getTotalSets, PAGE_SIZE, Set } from "../Logic/ContractQueries";
 import Link from "next/link";
 import Loader from '../Components/Loader'
 import { SetDetails } from "../Logic/ContractQueries";
@@ -15,9 +15,9 @@ interface NFT{
   image:string,
   address:string
 }
-const totalPages = 100;
 export default function Home() {
   const [page, setPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>();
   const [loading, setLoading] = useState<boolean>(false);
   const [Sets,setSets] = useState<SetDetails[]>();
   const getNFTlist = async()=>{
@@ -29,10 +29,16 @@ export default function Home() {
     setSets(setsWithDetails)
     setLoading(false)
   }
+  const setPages= async()=>{
+    const totalSets = await getTotalSets();
+    setTotalPages(Math.ceil((totalSets)/ PAGE_SIZE) );
+  }
   useEffect(() => {
     getNFTlist();
   }, [page]);
-
+  useEffect(() => {
+    setPages();
+  }, []);
   if (loading) {
     return <Loader />
   }
