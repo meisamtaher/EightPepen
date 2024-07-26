@@ -32,20 +32,25 @@ const EightPepenMint = () => {
       getSupply();
     }, []);
   return (
-    <div className='flex flex-col gap-5  pt-20 p-x-2'>
-        <a>
-Mint an unrevealed 8pepen token to become a collector. 
-</a>
-<a> With your unrevealed token you can start opting in to a set you like.
-When enough collectors are interested in the artwork, the metadata of your token will change to your opt-in artwork.
-</a>
-<a>We start with a first-come first-serve principal</a>
-<div className='flex felx-row  gap-4'><a>mint Price: </a><a className='text-lg font-extrabold'> {mintPrice} Eth</a></div>
-<div className='flex flex-row '> {totalSuply}/{maxSupply}</div>
-
-
-
-        <button className='p-12 text-4xl bg-black w-64 text-white' onClick={mintEightPepen}> Mint</button>
+    <div className='flex flex-col gap-5  pt-10 p-x-2'>
+      <a className=' text-lg'>JOIN THE WEB3 REVOLUTION</a>
+      <a className=' text-xs'>
+        Mint an unrevealed 8pepen token to become a collector & curator. 
+      </a>
+      <a className=' text-xs'> With your unrevealed token you can start opting in to a sets of your choice and shape actively the 8pepen collection.</a>
+      <a className=' text-xs'> When enough collectors are interested in the set, a consensus is met and the metadata of your unrevealed token will change to the artwork you opted in.</a>
+      <a className=' text-xs'>We start with a first-come first-serve principal</a>
+      <a className='mt-10 text-lg' >8✖️8 Contract</a>
+      <div className='border-t-4 border-black' />
+      <div className='flex flex-wrap  gap-20 p-4'>
+        <div className='flex flex-col gap-5'>
+          <div className='flex felx-row  gap-4'><a> mint Price: </a><a className='text-lg font-extrabold'> {mintPrice} Eth</a></div>
+          <div className='flex flex-row '> {totalSuply}/{maxSupply}</div>
+        </div>
+        <div className='grid flex-1 justify-items-center'>
+          <button className='text-lg bg-black  text-white px-8 py-4' onClick={mintEightPepen}> Mint</button>
+        </div>
+      </div>
     </div>
   )
 }
