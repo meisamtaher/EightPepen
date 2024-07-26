@@ -12,6 +12,7 @@ contract EightPepenFCNFT is ERC721 {
     uint public mintPrice = 0.00003 ether;
     IEightPepenFCRenderer public renderer;
     uint64 public setSupply;
+    uint32 public setNumber;
     uint public imageSupply;
     uint public collabReqCount;
     struct Set{
@@ -22,6 +23,7 @@ contract EightPepenFCNFT is ERC721 {
         address artist;
         uint256[] images;
         bool revealed;
+        uint32 setNumber;
     }
     struct SetData{
         string name;
@@ -130,35 +132,37 @@ contract EightPepenFCNFT is ERC721 {
         unsafe_opt_in(_imageId,_tokenId);
         emit TokenOptedIn(_tokenId,_imageId);
     }
-    function collab_req(uint256 _ownedToken,uint256 _secondToken)public {
-        require(_ownedToken>0 && _ownedToken<=totalSupply,"token not found");
-        require(_secondToken>0 && _secondToken<=totalSupply,"token not found");
-        require(images[tokens[_ownedToken].imageId].revealed,"token not revealed");
-        require(images[tokens[_secondToken].imageId].revealed,"token not revealed");
-        require(ownerOf(_ownedToken)== msg.sender,"you are not the owner of token");
-        collabReqCount++;
-        collabReq[collabReqCount].imageId = _ownedToken;
-        collabReq[collabReqCount].secondId = _secondToken;
-        emit CollabRequested (collabReqCount,_ownedToken,_secondToken);
-    }
-    function accept_req(uint256 _collabReqId)public{
-        //check collab_req exist 
-        // check ownership 
-        require(_collabReqId>0 && _collabReqId<=collabReqCount, "collab not found");
-        TokenData memory collab = collabReq[_collabReqId];
-        require(ownerOf(collab.secondId)== msg.sender,"you are not the owner of token");
-        tokens[collab.imageId].secondId = tokens[collab.secondId].imageId;
-        tokens[collab.secondId].secondId = tokens[collab.imageId].imageId;
-        emit CollabAccepted(_collabReqId,collab.imageId,collab.secondId);
+    // function collab_req(uint256 _ownedToken,uint256 _secondToken)public {
+    //     require(_ownedToken>0 && _ownedToken<=totalSupply,"token not found");
+    //     require(_secondToken>0 && _secondToken<=totalSupply,"token not found");
+    //     require(images[tokens[_ownedToken].imageId].revealed,"token not revealed");
+    //     require(images[tokens[_secondToken].imageId].revealed,"token not revealed");
+    //     require(ownerOf(_ownedToken)== msg.sender,"you are not the owner of token");
+    //     collabReqCount++;
+    //     collabReq[collabReqCount].imageId = _ownedToken;
+    //     collabReq[collabReqCount].secondId = _secondToken;
+    //     emit CollabRequested (collabReqCount,_ownedToken,_secondToken);
+    // }
+    // function accept_req(uint256 _collabReqId)public{
+    //     //check collab_req exist 
+    //     // check ownership 
+    //     require(_collabReqId>0 && _collabReqId<=collabReqCount, "collab not found");
+    //     TokenData memory collab = collabReq[_collabReqId];
+    //     require(ownerOf(collab.secondId)== msg.sender,"you are not the owner of token");
+    //     tokens[collab.imageId].secondId = tokens[collab.secondId].imageId;
+    //     tokens[collab.secondId].secondId = tokens[collab.imageId].imageId;
+    //     emit CollabAccepted(_collabReqId,collab.imageId,collab.secondId);
 
-    }
+    // }
     function unsafe_opt_in(uint256 _imageId,uint256 _tokenId) internal {
         tokens[_tokenId].imageId = _imageId;
         votes[_imageId] ++;
         if(votes[_imageId]==images[_imageId].count){
             images[_imageId].revealed = true;
             if(isSetfullyOpt_int(images[_imageId].setId)){
+                setNumber++;
                 sets[images[_imageId].setId].revealed = true;
+                sets[images[_imageId].setId].setNumber = setNumber;
                 emit SetPublished (_imageId,images[_imageId].setId,images[_imageId].count,msg.sender);
             }
         }
@@ -167,9 +171,9 @@ contract EightPepenFCNFT is ERC721 {
     function tokenURI(uint tokenId)public view override returns (string memory){
         require(tokenId>0 && tokenId<=totalSupply,"Invalid tokenId");
         uint256 imageId = sets[images[tokens[tokenId].imageId].setId].revealed?tokens[tokenId].imageId:1;
-        return tokens[tokenId].secondId ==0? imageURI(imageId,tokenId) : imageURI(imageId,tokens[tokenId].secondId,tokenId);
+        return tokens[tokenId].secondId ==0? imageURI(imageId) : imageURI(imageId,tokens[tokenId].secondId);
     }
-    function imageURI(uint _imageId1,uint _imageId2, uint _tokenId)public view returns(string memory){
+    function imageURI(uint _imageId1,uint _imageId2)public view returns(string memory){
         require(_imageId1>0 && _imageId1<=imageSupply,"Invalid imageId");
         require(_imageId2>0 && _imageId2<=imageSupply,"Invalid imageId");
         IEightPepenFCRenderer customRenderer = (_imageId1!=0 && sets[images[_imageId1].setId].hasRenderer)?sets[images[_imageId1].setId].renderer:renderer;
@@ -181,7 +185,6 @@ contract EightPepenFCNFT is ERC721 {
                         bytes(
                             abi.encodePacked(
                                 '{"name": "Eight Pepen #',
-                                Strings.toString(_tokenId),
                                 '", "description": "Eight Pepen is a collection of 888 fully on-chain, randomly generated'
                                 '", "image":"data:image/svg+xml;base64,',
                                 Base64.encode(bytes(customRenderer.getSVG(images[_imageId1].pixelColors,images[_imageId1].bgColor,images[_imageId2].pixelColors,images[_imageId2].bgColor))),
@@ -227,7 +230,7 @@ contract EightPepenFCNFT is ERC721 {
         return string(
                 abi.encodePacked(
                     '{"trait_type":"Set", "value": "',
-                    sets[images[_imageId].setId].name,
+                    sets[images[_imageId].setId].setNumber==0?"-":Strings.toString(sets[images[_imageId].setId].setNumber),
                     '"},{"trait_type":"Revealed", "value": "',
                     images[_imageId].revealed?"True":"False",
                     '"},{"trait_type":"Renderer", "value": "',

@@ -341,19 +341,6 @@ export const EightPepenFCNFTABI = [
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "_collabReqId",
-        "type": "uint256"
-      }
-    ],
-    "name": "accept_req",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "components": [
           {
             "internalType": "uint256[2]",
@@ -491,24 +478,6 @@ export const EightPepenFCNFTABI = [
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_ownedToken",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_secondToken",
-        "type": "uint256"
-      }
-    ],
-    "name": "collab_req",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
         "name": "tokenId",
         "type": "uint256"
       }
@@ -579,12 +548,12 @@ export const EightPepenFCNFTABI = [
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_imageId",
+        "name": "_imageId1",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "_tokenId",
+        "name": "_imageId2",
         "type": "uint256"
       }
     ],
@@ -603,17 +572,7 @@ export const EightPepenFCNFTABI = [
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_imageId1",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_imageId2",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_tokenId",
+        "name": "_imageId",
         "type": "uint256"
       }
     ],
@@ -853,6 +812,19 @@ export const EightPepenFCNFTABI = [
   },
   {
     "inputs": [],
+    "name": "setNumber",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "",
+        "type": "uint32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "setSupply",
     "outputs": [
       {
@@ -903,6 +875,11 @@ export const EightPepenFCNFTABI = [
         "internalType": "bool",
         "name": "revealed",
         "type": "bool"
+      },
+      {
+        "internalType": "uint32",
+        "name": "setNumber",
+        "type": "uint32"
       }
     ],
     "stateMutability": "view",
