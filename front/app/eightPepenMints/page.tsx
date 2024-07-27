@@ -32,7 +32,7 @@ const EightPepenMint = () => {
       getSupply();
     }, []);
   return (
-    <div className='flex flex-col gap-5  pt-10 p-x-2'>
+    <div className='flex flex-col gap-5  pt-4 p-x-2'>
       <a className=' text-base'>JOIN THE WEB3 REVOLUTION</a>
       <a className=' text-[0.5rem]'>
         Mint an unrevealed 8pepen token to become a collector & curator. 
@@ -47,8 +47,8 @@ const EightPepenMint = () => {
           <div className='flex felx-row  gap-4 text-[0.5rem]'><a> mint Price: </a><a className='text-[0.5rem] font-extrabold'> {mintPrice} Eth</a></div>
           <div className='flex flex-row text-[0.5rem]'> {totalSuply}/{maxSupply}</div>
         </div>
-        <div className='grid flex-1 justify-items-center'>
-          <button className='text-base bg-black  text-white px-8 py-4' onClick={mintEightPepen}> Mint</button>
+        <div className='grid flex-1 justify-items-center align-middle'>
+          <button className='text-[0.5rem] bg-black  text-white p-2 h-fit' onClick={mintEightPepen}> Mint</button>
         </div>
       </div>
     </div>
