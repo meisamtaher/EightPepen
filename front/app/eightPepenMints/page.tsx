@@ -44,8 +44,8 @@ const EightPepenMint = () => {
       <div className='border-t-4 border-black' />
       <div className='flex flex-wrap  gap-20 p-4'>
         <div className='flex flex-col gap-5'>
-          <div className='flex felx-row  gap-4'><a> mint Price: </a><a className='text-lg font-extrabold'> {mintPrice} Eth</a></div>
-          <div className='flex flex-row '> {totalSuply}/{maxSupply}</div>
+          <div className='flex felx-row  gap-4 text-xs'><a> mint Price: </a><a className='text-xs font-extrabold'> {mintPrice} Eth</a></div>
+          <div className='flex flex-row tex-xs'> {totalSuply}/{maxSupply}</div>
         </div>
         <div className='grid flex-1 justify-items-center'>
           <button className='text-lg bg-black  text-white px-8 py-4' onClick={mintEightPepen}> Mint</button>

@@ -90,24 +90,24 @@ const EightPepenSetMint = () => {
   return (
     <div className='flex flex-col gap-4'>
       <div className='flex items-center'>
-        <div className='w-72 text-xl'>Edition Type:</div>
+        <div className='w-72 text-xs'>Edition Type:</div>
         <select className='w-56 p-4 text-xs' value={editionType} onChange={e => updateEditionType(e.target.value)}>
           <option value='numbered'>Numbered Print</option>
           <option value='print'>Print Edition</option>
         </select>
       </div>
       <div className='flex items-center'>
-        <div className='w-72 text-xl'>Renderer:</div>
+        <div className='w-72 text-xs'>Renderer:</div>
         <select className='w-56 p-4 text-xs' value={renderer} onChange={e => setRenderer(e.target.value)}>
-          <option value='default'>Default</option>
-          <option value='circular'>Circular</option>
-          <option value='cool'>Cool</option>
+          <option value='default'>Pixel</option>
+          <option value='circular'>Circle</option>
+          <option value='cool'>Original</option>
         </select>
       </div>
       {(editionType === 'print' ? copyCountArray : [1]).map((copies, i) => (
         <div key={i} className='mt-4 mb-4'>
           <div className='mb-16 border-t-4 border-black' />
-          <div className='mb-4 text-xl'>{copies + (copies === 1 ? ' Copy' : ' Copies')}</div>
+          <div className='mb-4 text-xl'>{copies + (copies === 1 ? ' Edition' : ' Edition')}</div>
           <ColorPicker
             title='Background Color'
             color={bgColors[i][0]}
@@ -149,8 +149,8 @@ const EightPepenSetMint = () => {
         <input className='p-3' value={description} onChange={e => setDescription(e.target.value)} />
       </div>
       <div className='mt-8 flex gap-4'>
-        <button className='p-4 w-64 text-black bg-white' onClick={() => updateEditionType('numbered')}>Cancel</button>
-        <button className={'p-4 w-64 text-white ' + (canSubmit ? 'bg-black' : 'bg-gray-400')} disabled={!canSubmit} onClick={mintEightPepen}>Mint</button>
+        <button className='p-4 w-64 text-black bg-white text-lg ' onClick={() => updateEditionType('numbered')}>Cancel</button>
+        <button className={'p-4 w-64 text-white text-lg ' + (canSubmit ? 'bg-black' : 'bg-gray-400')} disabled={!canSubmit} onClick={mintEightPepen}>Submit</button>
       </div>
     </div>
   )
