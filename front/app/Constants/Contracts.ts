@@ -4,3 +4,4 @@ export const EightPepenFCContractAddress="0x9874e9b7525d3341ce9093082b84D364D59b
 export const EightPepenFCRenderer="0xa1d46Cdb725d330683f327429C6037C28fb79Cdb"
 export const EightPepenFCCircularRenderer="0x0e2a20748b3a58BF0F1d187c2Daa412405eb393E"
 export const EightPepenFCOpepenRenderer="0xFB8BDb17d679cfe4Db5F105e4ecD8f350b3E0327"
+export const BaseOpenseaLink="https://testnets.opensea.io/assets/base-sepolia/0x9874e9b7525d3341ce9093082b84d364d59b68cc/"

@@ -4,6 +4,10 @@ import { getTokenDetails, NFT, refreshNFTmetadata } from '@/app/Logic/TokenQueri
 import { Nft } from 'alchemy-sdk';
 import React, { useEffect, useState } from 'react'
 import { FaArrowsRotate } from "react-icons/fa6";
+import openseaLogo from "@/public/opensea.png"
+import Image from 'next/image'
+import Link from 'next/link';
+import { BaseOpenseaLink } from '@/app/Constants/Contracts';
 
 const TokenPage = ({ params }: { params: { tokenId: string } }) => {
   const [nft,setNft] = useState<Nft>();
@@ -28,6 +32,11 @@ const TokenPage = ({ params }: { params: { tokenId: string } }) => {
 
             <div className='w-[300px] h-[300px] flex flex-col g-1'>
                 <img src={nft.raw.metadata.image} width={300} height={300}></img> 
+                <Link href={BaseOpenseaLink + nft.tokenId} target='_blank' rel='noopener noreferrer'>
+
+                    <Image src={openseaLogo} alt="Opensea link" className='w-5 h-5 ml-2 mt-2 hover:bg-black rounded-full'/>
+                      
+                </Link>
 
             </div>
             <div className='flex flex-col gap-6 pt-8 pl-10'>
