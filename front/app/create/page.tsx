@@ -20,6 +20,7 @@ const EightPepenSetMint = () => {
   const account = useAccount();
   const [loading, setLoading] = useState<boolean>(false)
   const [renderer, setRenderer] = useState<string>('default')
+  const [editionCount, setEditionCount] = useState<string>('8')
   const [editionType, setEditionType] = useState<string>('numbered')
   const [colorPixels, setColorPixels] = useState<string[]>(Array(6).fill(''))
   const bgColors = Array(6).fill().map(() => useColor('#121212')) // eslint-disable-line
@@ -46,7 +47,7 @@ const EightPepenSetMint = () => {
           return {
             pixelColors: [firsthalf, secondhalf],
             bgColor: bigIntBgColor,
-            count: editionType === 'numbered' ? 1 : copyCountArray[i]
+            count: editionType === 'numbered' ? editionCount : copyCountArray[i]
           }
         }), {
           name: setName,
@@ -64,7 +65,7 @@ const EightPepenSetMint = () => {
     //   setLoading(false)
     //   updateEditionType('numbered')
     // }
-    router.push('/submissions')
+    router.push('/sets')
   }
   const updateEditionType = type => {
     setEditionType(type)
@@ -107,7 +108,17 @@ const EightPepenSetMint = () => {
       {(editionType === 'print' ? copyCountArray : [1]).map((copies, i) => (
         <div key={i} className=''>
           <div className='mb-8 border-t-4 border-black' />
-          <div className='mb-4 text-base'>{copies + (copies === 1 ? ' Edition' : ' Edition')}</div>
+          <div className='mb-4 text-base'>{(editionType !='print'?editionCount:copies) + (copies === 1 ? ' Edition' : ' Edition')}</div>
+          {(editionType != 'print') && 
+            <div className='flex items-center mt-2 mb-8'>
+              <div className='w-56 text-xxs'>Edition: </div>
+              <select className='p-4 text-xxs' value={editionCount} onChange={e => setEditionCount(e.target.value)}>
+                <option value='8'>8</option>
+                <option value='16'>16</option>
+                <option value='24'>24</option>
+                <option value='32'>32</option>
+              </select>
+            </div>}
           <ColorPicker
             title='Background Color'
             color={bgColors[i][0]}
