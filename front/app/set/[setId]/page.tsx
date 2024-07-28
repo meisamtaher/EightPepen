@@ -4,17 +4,38 @@ import { RiVerifiedBadgeFill } from 'react-icons/ri'
 import { getSetDetails, SetDetails } from '@/app/Logic/ContractQueries';
 import Loader from '../../Components/Loader'
 import React, { useEffect } from 'react'
+import { useAccount, useWriteContract } from 'wagmi';
+import { getVotingTokensOfOwner } from '@/app/Logic/TokenQueries';
+import { EightPepenFCContractAddress } from '@/app/Constants/Contracts';
+import { EightPepenFCNFTABI } from '@/app/ABIs/EightPepenFCNFTABI';
 
 const SetDetailsPage = ({ params }: { params: { setId: string } }) => {
+  const { writeContract } = useWriteContract();
+  const account = useAccount();
   const [loading, setLoading] = useState<boolean>(false);
   const [setDetails, setSetDetails] = useState<SetDetails| undefined>(undefined);
 
   const loadSetDetails = async () => {
     setLoading(true);
     const setDetails = await getSetDetails(Number(params.setId));
+    console.log("Set Details: ", setDetails);
     setSetDetails(setDetails);
     setLoading(false);
   };
+  const opt_in =  async(imageId:number)=>{
+    console.log('Hello');
+    if(account.isConnected){
+      const voting_tokens = await getVotingTokensOfOwner(account.address!);
+      if(voting_tokens.length>0){
+        const hash = await writeContract({
+          address: EightPepenFCContractAddress,
+          abi: EightPepenFCNFTABI,
+          functionName: 'opt_in',
+          args: [BigInt(imageId),BigInt(voting_tokens[0].tokenId)]
+        })
+      }
+    }
+  }
 
   useEffect(() => {
     loadSetDetails();
@@ -45,7 +66,12 @@ const SetDetailsPage = ({ params }: { params: { setId: string } }) => {
           <div key={i} className='mt-16'>
             {image.counts} Editions
             <div className='my-4 border-t-4 border-black' />
-            <img width={300} height={300} src={image.URI.image} />
+            <div className='flex flex-wrap gap-4'>
+              <img className="row-span-4" width={300} height={300} src={image.URI.image} />
+              <div className=" justify-start align-bottom">
+                <button disabled={image.counts==image.votes} className={" mb-4 w-24  p-2 h-fit align-bottom text-white text-xxs " + (image.counts==image.votes ? 'bg-gray-400' : 'bg-black') } onClick={()=>opt_in(image.id)}>opt-in </button>
+              </div>
+            </div>
           </div>
         ))}
       </div>}

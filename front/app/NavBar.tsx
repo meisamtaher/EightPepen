@@ -24,7 +24,7 @@ const NavBar = () => {
   const links = [
     {href:"/eightPepenMints",label:"Mint"},
     {href:"/create",label:"Create"},
-    {href:"/submissions",label:"Submissions"},
+    // {href:"/submissions",label:"Submissions"},
     {href:"/sets",label:"sets"},
   ]
   return <>
