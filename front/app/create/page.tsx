@@ -105,8 +105,8 @@ const EightPepenSetMint = () => {
         </select>
       </div>
       {(editionType === 'print' ? copyCountArray : [1]).map((copies, i) => (
-        <div key={i} className='mt-4 mb-4'>
-          <div className='mb-16 border-t-4 border-black' />
+        <div key={i} className=''>
+          <div className='mb-8 border-t-4 border-black' />
           <div className='mb-4 text-base'>{copies + (copies === 1 ? ' Edition' : ' Edition')}</div>
           <ColorPicker
             title='Background Color'
@@ -136,8 +136,8 @@ const EightPepenSetMint = () => {
           />
         </div>
       ))}
-      <div className='my-16 border-t-4 border-black' />
-      <div className='mb-8 text-base'>
+      <div className=' border-t-4 border-black' />
+      <div className='my-8 text-base'>
         Set Data
       </div>
       <div className='flex items-center'>
@@ -149,8 +149,8 @@ const EightPepenSetMint = () => {
         <input className='p-3' value={description} onChange={e => setDescription(e.target.value)} />
       </div>
       <div className='mt-8 flex gap-4'>
-        <button className='p-4 w-64 text-black bg-white text-base ' onClick={() => updateEditionType('numbered')}>Cancel</button>
-        <button className={'p-4 w-64 text-white text-base ' + (canSubmit ? 'bg-black' : 'bg-gray-400')} disabled={!canSubmit} onClick={mintEightPepen}>Submit</button>
+        <button className='p-4 w-36 text-black bg-white text-xxs ' onClick={() => updateEditionType('numbered')}>Cancel</button>
+        <button className={'p-4 w-36 text-white text-xxs ' + (canSubmit ? 'bg-black' : 'bg-gray-400')} disabled={!canSubmit} onClick={mintEightPepen}>Submit</button>
       </div>
     </div>
   )
