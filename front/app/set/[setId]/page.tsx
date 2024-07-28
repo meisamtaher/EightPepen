@@ -8,6 +8,7 @@ import { useAccount, useWriteContract } from 'wagmi';
 import { getVotingTokensOfOwner } from '@/app/Logic/TokenQueries';
 import { EightPepenFCContractAddress } from '@/app/Constants/Contracts';
 import { EightPepenFCNFTABI } from '@/app/ABIs/EightPepenFCNFTABI';
+import AddressViewer from '@/app/Components/AddressViewer';
 
 const SetDetailsPage = ({ params }: { params: { setId: string } }) => {
   const { writeContract } = useWriteContract();
@@ -48,8 +49,15 @@ const SetDetailsPage = ({ params }: { params: { setId: string } }) => {
   return (
     <div className='flex flex-col'>
       {setDetails && <div>
-        <div className='text-base mb-2'>{setDetails.name}</div>
-        <div className='text-xxs mb-4'>{setDetails.description}</div>
+        <div className='flex flex-row'>
+          <div className='mb-2'>
+            <div className='text-base '>{setDetails.name}</div>
+            <div className='text-xxs  mt-2'>{setDetails.description}</div>
+          </div>
+          <div className='ml-20'>
+            <AddressViewer address={setDetails.owner}></AddressViewer>
+          </div>
+        </div>
         <div className='mb-8 border-t-4 border-black' />
         <div className='flex gap-16 text-xxs mb-24'>
           <div className='flex flex-col gap-2'>SET<div>{setDetails!.id}</div></div>
