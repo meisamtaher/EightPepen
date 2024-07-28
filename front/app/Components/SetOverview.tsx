@@ -17,7 +17,7 @@ const SetOverview = ({set}: {set: SetDetails}) => {
             <img src={set.images[0].URI.image} />
           )}
         </div>
-        <div className='flex justify-between gap-4 text-xs'>
+        <div className='flex justify-between gap-4 text-xxs'>
           <div className='flex gap-2'>
             {set.images!.length > 1 ? 'Print Edition' : 'Numbered Print'}
             {set.revealed && (
@@ -28,7 +28,7 @@ const SetOverview = ({set}: {set: SetDetails}) => {
           </div>
           <div>{set.votes}/{set.counts}</div>
         </div>
-        <div className='flex justify-between gap-4 text-xs text-slate-500'>
+        <div className='flex justify-between gap-4 text-xxs text-slate-500'>
           <div>8x8</div>
           <div className='truncate'>{set.name}</div>
         </div>

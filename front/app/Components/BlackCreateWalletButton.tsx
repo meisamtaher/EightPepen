@@ -55,7 +55,7 @@ function Gradient({ children, style, isAnimationDisabled = false }) {
 export function BlackCreateWalletButton({ height = 40, width = 200 }) {
   const { connectors, connect } = useConnect();
  
-  const minButtonHeight = 48;
+  const minButtonHeight = 40;
   const minButtonWidth = 200;
   const buttonHeight = Math.max(minButtonHeight, height);
   const buttonWidth = Math.max(minButtonWidth, width);

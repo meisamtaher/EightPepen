@@ -25,9 +25,9 @@ const MainPage = () => {
                 <div className='w-[150px] h-[250px] flex flex-col gap-2'>
                     <img src={nft.image} width={150} height={150}></img>  
                     <div className='flex flex-row'>
-                        <a className='w-[150px] text-wrap text-xs'>8✖️8</a>
+                        <a className='w-[150px] text-wrap text-xxs'>8✖️8</a>
                         <div className='flex flex-1 flex-row-reverse'>
-                            <a className=' text-wrap text-xs '>#{nft.id}</a>
+                            <a className=' text-wrap text-xxs '>#{nft.id}</a>
                         </div>
                     </div>
                 </div>

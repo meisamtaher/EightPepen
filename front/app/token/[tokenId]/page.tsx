@@ -32,19 +32,19 @@ const TokenPage = ({ params }: { params: { tokenId: string } }) => {
             </div>
             <div className='flex flex-col gap-6 pt-8 pl-10'>
               <div className='flex flex-col gap-1'>
-                <a className='text-xs'>SET </a>
-                <a className='text-xs'>{nft!.name}</a>
+                <a className='text-xxs'>SET </a>
+                <a className='text-xxs'>{nft!.name}</a>
               </div>
               <div className='flex flex-col gap-1'>
-                <a className='text-xs'>DESCRIPTION </a>
-                <a className='text-xs'>{nft!.description}</a>
+                <a className='text-xxs'>DESCRIPTION </a>
+                <a className='text-xxs'>{nft!.description}</a>
               </div>
-              <a className=' text-wrap text-xs mt-2'></a>
+              <a className=' text-wrap text-xxs mt-2'></a>
               <div className='flex flex-auto gap-8'>
                 {nft!.raw!.metadata!.attributes!.map((attribute: { trait_type: string , value: string },index:number)=>(
                   <div key={index} className='flex flex-col gap-1'>
-                    <a className='text-xs'>{attribute.trait_type}</a>
-                    <a className='text-xs'>{attribute.value}</a>
+                    <a className='text-xxs'>{attribute.trait_type}</a>
+                    <a className='text-xxs'>{attribute.value}</a>
                   </div>
                 ))}
               </div>

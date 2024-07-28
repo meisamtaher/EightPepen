@@ -10,7 +10,7 @@ const Loader = () => {
   }, [])
 
   return (
-    <div className='m-16 text-xl'>
+    <div className='m-16 text-base'>
       loading{Array(dotsCount).fill('.')}
     </div>
   )

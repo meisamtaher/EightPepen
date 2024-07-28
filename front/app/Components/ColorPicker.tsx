@@ -16,9 +16,9 @@ let ColorPicker = ({ title, color, onChange, isPicking, onPick }) => {
           <button />
         </form>
       </dialog>
-      <div className='w-56 text-xs'>{title}:</div>
+      <div className='w-56 text-xxs'>{title}:</div>
       <button
-        className='btn h-4 w-12 text-xs'
+        className='btn h-4 w-12 text-xxs'
         style={{ background: color.hex }}
         onClick={() => ref.current.showModal()}
       />

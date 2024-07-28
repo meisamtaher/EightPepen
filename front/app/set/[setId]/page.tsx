@@ -27,10 +27,10 @@ const SetDetailsPage = ({ params }: { params: { setId: string } }) => {
   return (
     <div className='flex flex-col'>
       {setDetails && <div>
-        <div className='text-xl mb-2'>{setDetails.name}</div>
-        <div className='text-xs mb-4'>{setDetails.description}</div>
+        <div className='text-base mb-2'>{setDetails.name}</div>
+        <div className='text-xxs mb-4'>{setDetails.description}</div>
         <div className='mb-8 border-t-4 border-black' />
-        <div className='flex gap-16 text-xs mb-24'>
+        <div className='flex gap-16 text-xxs mb-24'>
           <div className='flex flex-col gap-2'>SET<div>{setDetails!.id}</div></div>
           {setDetails.revealed && (
             <div className='flex flex-col gap-2'>

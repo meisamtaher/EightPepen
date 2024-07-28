@@ -46,10 +46,10 @@ const Submissions = () => {
           <div key={image.id} className='flex flex-col  justify-center'>
             <div  className='flex flex-col w-[150px] h-[240px] gap-1 justify-self-center'>
                 <img src={image.URI.image} width={150} height={150}></img>  
-                <a className='w-[150px] text-wrap text-xs'>name: {image.URI.name}</a>
-                <a className='w-[150px] text-wrap text-xs mt-2'>opt-ins: {image.votes}/{image.counts}</a>
+                <a className='w-[150px] text-wrap text-xxs'>name: {image.URI.name}</a>
+                <a className='w-[150px] text-wrap text-xxs mt-2'>opt-ins: {image.votes}/{image.counts}</a>
             </div>
-              <button  className=" p-1 w-24 justify-self-center text-white text-xs bg-black" onClick={()=>opt_in(image.id)}>opt-in </button>
+              <button  className=" p-1 w-24 justify-self-center text-white text-xxs bg-black" onClick={()=>opt_in(image.id)}>opt-in </button>
           </div>
         ))}
     </div>

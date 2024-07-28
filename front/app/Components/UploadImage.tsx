@@ -315,7 +315,7 @@ let Upload = forwardRef(({ bgColor, defaultFillColor, renderer, onChange, penCol
       ) : (
         <div
           {...getRootProps()}
-          className={'cursor-pointer flex flex-col gap-4 p-2 items-center justify-center font-light text-xs text-center'
+          className={'cursor-pointer flex flex-col gap-4 p-2 items-center justify-center font-light text-xxs text-center'
             + ' bg-[#F5F5F5] text-[#828282]'}
           style={{ width: dim, height: dim }}
         >

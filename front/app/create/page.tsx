@@ -90,15 +90,15 @@ const EightPepenSetMint = () => {
   return (
     <div className='flex flex-col gap-4'>
       <div className='flex items-center'>
-        <div className='w-72 text-xs'>Edition Type:</div>
-        <select className='w-56 p-4 text-xs' value={editionType} onChange={e => updateEditionType(e.target.value)}>
+        <div className='w-72 text-xxs'>Edition Type:</div>
+        <select className='w-56 p-4 text-xxs' value={editionType} onChange={e => updateEditionType(e.target.value)}>
           <option value='numbered'>Numbered Print</option>
           <option value='print'>Print Edition</option>
         </select>
       </div>
       <div className='flex items-center'>
-        <div className='w-72 text-xs'>Renderer:</div>
-        <select className='w-56 p-4 text-xs' value={renderer} onChange={e => setRenderer(e.target.value)}>
+        <div className='w-72 text-xxs'>Renderer:</div>
+        <select className='w-56 p-4 text-xxs' value={renderer} onChange={e => setRenderer(e.target.value)}>
           <option value='default'>Pixel</option>
           <option value='circular'>Circle</option>
           <option value='cool'>Original</option>
@@ -107,7 +107,7 @@ const EightPepenSetMint = () => {
       {(editionType === 'print' ? copyCountArray : [1]).map((copies, i) => (
         <div key={i} className='mt-4 mb-4'>
           <div className='mb-16 border-t-4 border-black' />
-          <div className='mb-4 text-xl'>{copies + (copies === 1 ? ' Edition' : ' Edition')}</div>
+          <div className='mb-4 text-base'>{copies + (copies === 1 ? ' Edition' : ' Edition')}</div>
           <ColorPicker
             title='Background Color'
             color={bgColors[i][0]}
@@ -137,20 +137,20 @@ const EightPepenSetMint = () => {
         </div>
       ))}
       <div className='my-16 border-t-4 border-black' />
-      <div className='mb-8 text-xl'>
+      <div className='mb-8 text-base'>
         Set Data
       </div>
       <div className='flex items-center'>
-        <div className='my-4 w-52 text-xs'>Set Name:</div>
+        <div className='my-4 w-52 text-xxs'>Set Name:</div>
         <input className='p-3' value={setName} onChange={e => setSetName(e.target.value)} />
       </div>
       <div className='flex items-center'>
-        <div className='my-4 w-52 text-xs'>Description:</div>
+        <div className='my-4 w-52 text-xxs'>Description:</div>
         <input className='p-3' value={description} onChange={e => setDescription(e.target.value)} />
       </div>
       <div className='mt-8 flex gap-4'>
-        <button className='p-4 w-64 text-black bg-white text-lg ' onClick={() => updateEditionType('numbered')}>Cancel</button>
-        <button className={'p-4 w-64 text-white text-lg ' + (canSubmit ? 'bg-black' : 'bg-gray-400')} disabled={!canSubmit} onClick={mintEightPepen}>Submit</button>
+        <button className='p-4 w-64 text-black bg-white text-base ' onClick={() => updateEditionType('numbered')}>Cancel</button>
+        <button className={'p-4 w-64 text-white text-base ' + (canSubmit ? 'bg-black' : 'bg-gray-400')} disabled={!canSubmit} onClick={mintEightPepen}>Submit</button>
       </div>
     </div>
   )
