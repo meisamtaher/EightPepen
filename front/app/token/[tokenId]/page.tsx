@@ -30,16 +30,24 @@ const TokenPage = ({ params }: { params: { tokenId: string } }) => {
         {nft && 
           <div className='flex flex-wrap'>
 
-            <div className='w-[300px] h-[300px] flex flex-col g-1'>
+            <div className='flex flex-col pr-8'>
                 <img src={nft.raw.metadata.image} width={300} height={300}></img> 
-                <Link href={BaseOpenseaLink + nft.tokenId} target='_blank' rel='noopener noreferrer'>
-
-                    <Image src={openseaLogo} alt="Opensea link" className='w-5 h-5 ml-2 mt-2 hover:bg-black rounded-full'/>
-                      
-                </Link>
-
+                <div className='flex flex-row align-middle'>
+                  <button>
+                    <Link href={BaseOpenseaLink + nft.tokenId} target='_blank' rel='noopener noreferrer'>
+                      <Image src={openseaLogo} alt="Opensea link" className='w-5 h-5 ml-2 mt-2 hover:bg-black rounded-full'/>
+                    </Link>
+                  </button>
+                  <div className='flex flex-1 flex-row-reverse ml-2 mt-2'>
+                    {loading && <Loader></Loader>}
+                    {!loading && <button  className="flex flex-row-reverse" onClick={()=>refresh()}>
+                      <FaArrowsRotate/>
+                    </button>}
+                  </div>
+                </div>
+                
             </div>
-            <div className='flex flex-col gap-6 pt-8 pl-10'>
+            <div className='flex flex-col gap-6 mt-8 ml-2'>
               <div className='flex flex-col gap-1'>
                 <a className='text-xxs'>SET </a>
                 <a className='text-xxs'>{nft!.name}</a>
@@ -58,10 +66,6 @@ const TokenPage = ({ params }: { params: { tokenId: string } }) => {
                 ))}
               </div>
             </div>
-            {loading && <Loader></Loader>}
-            {!loading && <button  className="flex flex-row-reverse" onClick={()=>refresh()}>
-              <FaArrowsRotate/>
-            </button>}
           </div>
 
           
